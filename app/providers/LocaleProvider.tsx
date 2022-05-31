@@ -5,10 +5,10 @@ type LocaleContext = {
   locales: string[];
 };
 
-type LocaleContextProviderProps = {
+interface LocaleContextProviderProps {
   locales: string[];
   children: ReactNode;
-};
+}
 
 const MyContext = createContext<LocaleContext | null>(null);
 

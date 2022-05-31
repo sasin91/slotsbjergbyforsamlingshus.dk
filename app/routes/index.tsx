@@ -6,7 +6,7 @@ import {
   XIcon,
 } from "@heroicons/react/outline";
 import type { Post } from "@prisma/client";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { marked } from "marked";
@@ -17,21 +17,19 @@ import dinnerParty from "~/images/borddaekning1.jpg";
 import footerImageTwo from "~/images/bund2.jpg";
 import footerImageOne from "~/images/bundloeber.jpg";
 import cakes from "~/images/fotokager.jpg";
-import foodDelivery from "~/images/jon-tyson-UuzUfw4qepk-unsplash.jpg";
 import banner from "~/images/nytoppiccy.jpg";
 import { getPosts } from "~/models/post.server";
 import { useOptionalUser } from "~/utils";
-import { $path } from "remix-routes";
 
 const routes = {
-  signIn: $path("/log-ind"),
-  signUp: $path("/opret"),
-  signOut: $path("/log-ud"),
-  dashboard: $path("/brugerpanel"),
-  book: $path("/book"),
-  order: $path("/bestil"),
-  faq: $path("/faq"),
-  news: $path("/nyheder"),
+  signIn: "/log-ind",
+  signUp: "/opret",
+  signOut: "/log-ud",
+  dashboard: "/brugerpanel",
+  book: "/book",
+  order: "/bestil",
+  faq: "/faq",
+  news: "/nyheder",
 };
 
 const navigation = {
@@ -101,6 +99,7 @@ export default function Index() {
   const user = useOptionalUser();
   const { posts } = useLoaderData<LoaderData>();
   const [open, setOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   return (
     <div className="bg-white">
@@ -210,6 +209,7 @@ export default function Index() {
                   <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
                       <Link
+                        role="sign-up"
                         to={routes.signUp}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
@@ -218,6 +218,7 @@ export default function Index() {
                     </div>
                     <div className="flow-root">
                       <Link
+                        role="log in"
                         to={routes.signIn}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
@@ -259,12 +260,14 @@ export default function Index() {
                   {user ? (
                     <React.Fragment>
                       <Link
+                        role="log in"
                         to={routes.signIn}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
                         Login
                       </Link>
                       <Link
+                        role="sign up"
                         to={routes.signUp}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
@@ -272,12 +275,23 @@ export default function Index() {
                       </Link>
                     </React.Fragment>
                   ) : (
-                    <Link
-                      to={routes.dashboard}
-                      className="text-sm font-medium text-white hover:text-gray-100"
-                    >
-                      Brugerpanel
-                    </Link>
+                    <React.Fragment>
+                      <Link
+                        to={routes.dashboard}
+                        className="text-sm font-medium text-white hover:text-gray-100"
+                      >
+                        Brugerpanel
+                      </Link>
+                      <Form action={routes.signOut} method="post">
+                        <button
+                          role="logout"
+                          type="submit"
+                          className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
+                        >
+                          Log ud
+                        </button>
+                      </Form>
+                    </React.Fragment>
                   )}
                 </div>
               </div>
