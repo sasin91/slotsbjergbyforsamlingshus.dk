@@ -5,6 +5,30 @@ import type { User } from "~/models/user.server";
 
 const DEFAULT_REDIRECT = "/";
 
+export const routes = {
+  signIn: "/log-ind",
+  signUp: "/opret",
+  signOut: "/log-ud",
+  dashboard: "/brugerpanel",
+  book: "/book",
+  order: "/bestil",
+  faq: "/faq",
+  news: "/nyheder",
+};
+
+export const translations = {
+  routes: {
+    signIn: "Log ind",
+    signUp: "Opret konto",
+    signOut: "Log ud",
+    dashboard: "Brugerpanel",
+    book: "Book",
+    order: "Bestil",
+    faq: "FAQ",
+    news: "Nyheder",
+  },
+};
+
 /**
  * This should be used any time the redirect path is user-provided
  * (Like the query string on our login/signup pages). This avoids

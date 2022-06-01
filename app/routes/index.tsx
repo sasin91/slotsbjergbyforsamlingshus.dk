@@ -19,18 +19,7 @@ import footerImageOne from "~/images/bundloeber.jpg";
 import cakes from "~/images/fotokager.jpg";
 import banner from "~/images/nytoppiccy.jpg";
 import { getPosts } from "~/models/post.server";
-import { useOptionalUser } from "~/utils";
-
-const routes = {
-  signIn: "/log-ind",
-  signUp: "/opret",
-  signOut: "/log-ud",
-  dashboard: "/brugerpanel",
-  book: "/book",
-  order: "/bestil",
-  faq: "/faq",
-  news: "/nyheder",
-};
+import { useOptionalUser, routes, translations } from "~/utils";
 
 const navigation = {
   categories: [
@@ -201,8 +190,16 @@ export default function Index() {
                         to={routes.dashboard}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
-                        Brugerpanel
+                        {translations.routes.dashboard}
                       </Link>
+                      <Form action={routes.signOut} method="post">
+                        <button
+                          type="submit"
+                          className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
+                        >
+                          {translations.routes.signOut}
+                        </button>
+                      </Form>
                     </div>
                   </div>
                 ) : (
@@ -213,7 +210,7 @@ export default function Index() {
                         to={routes.signUp}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
-                        Opret konto
+                        {translations.routes.signUp}
                       </Link>
                     </div>
                     <div className="flow-root">
@@ -222,7 +219,7 @@ export default function Index() {
                         to={routes.signIn}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
-                        Login
+                        {translations.routes.signIn}
                       </Link>
                     </div>
                   </div>
@@ -264,14 +261,14 @@ export default function Index() {
                         to={routes.signIn}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
-                        Login
+                        {translations.routes.signIn}
                       </Link>
                       <Link
                         role="sign up"
                         to={routes.signUp}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
-                        Opret konto
+                        {translations.routes.signUp}
                       </Link>
                     </React.Fragment>
                   ) : (
@@ -280,15 +277,14 @@ export default function Index() {
                         to={routes.dashboard}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
-                        Brugerpanel
+                        {translations.routes.dashboard}
                       </Link>
                       <Form action={routes.signOut} method="post">
                         <button
-                          role="logout"
                           type="submit"
                           className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
                         >
-                          Log ud
+                          {translations.routes.signOut}
                         </button>
                       </Form>
                     </React.Fragment>
@@ -421,7 +417,7 @@ export default function Index() {
                         to={routes.faq}
                         className="hidden text-sm font-medium text-white lg:block"
                       >
-                        FAQ
+                        {translations.routes.faq}
                       </Link>
 
                       {/* Cart */}
@@ -522,7 +518,7 @@ export default function Index() {
                 id="favorites-heading"
                 className="text-2xl font-extrabold tracking-tight text-gray-900"
               >
-                Nyheder
+                {translations.routes.news}
               </h2>
               <Link
                 to={routes.news}
@@ -553,7 +549,7 @@ export default function Index() {
                       </Link>
                       <div className="mt-3">
                         <Link
-                          to={post.slug}
+                          to={`/posts/${post.slug}`}
                           className="text-base font-semibold text-indigo-600 hover:text-indigo-500"
                         >
                           læs hele artiklen
