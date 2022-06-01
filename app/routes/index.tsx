@@ -206,7 +206,6 @@ export default function Index() {
                   <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
                       <Link
-                        role="sign-up"
                         to={routes.signUp}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
@@ -215,7 +214,6 @@ export default function Index() {
                     </div>
                     <div className="flow-root">
                       <Link
-                        role="log in"
                         to={routes.signIn}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
@@ -257,23 +255,6 @@ export default function Index() {
                   {user ? (
                     <React.Fragment>
                       <Link
-                        role="log in"
-                        to={routes.signIn}
-                        className="text-sm font-medium text-white hover:text-gray-100"
-                      >
-                        {translations.routes.signIn}
-                      </Link>
-                      <Link
-                        role="sign up"
-                        to={routes.signUp}
-                        className="text-sm font-medium text-white hover:text-gray-100"
-                      >
-                        {translations.routes.signUp}
-                      </Link>
-                    </React.Fragment>
-                  ) : (
-                    <React.Fragment>
-                      <Link
                         to={routes.dashboard}
                         className="text-sm font-medium text-white hover:text-gray-100"
                       >
@@ -287,6 +268,21 @@ export default function Index() {
                           {translations.routes.signOut}
                         </button>
                       </Form>
+                    </React.Fragment>
+                  ) : (
+                    <React.Fragment>
+                      <Link
+                        to={routes.signIn}
+                        className="text-sm font-medium text-white hover:text-gray-100"
+                      >
+                        {translations.routes.signIn}
+                      </Link>
+                      <Link
+                        to={routes.signUp}
+                        className="text-sm font-medium text-white hover:text-gray-100"
+                      >
+                        {translations.routes.signUp}
+                      </Link>
                     </React.Fragment>
                   )}
                 </div>
