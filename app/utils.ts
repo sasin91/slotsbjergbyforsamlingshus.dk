@@ -12,8 +12,8 @@ export const routes = {
   dashboard: "/brugerpanel",
   book: "/book",
   order: "/bestil",
-  faq: "/faq",
   news: "/nyheder",
+  privacy: "/privatliv",
 };
 
 export const translations = {
@@ -24,7 +24,6 @@ export const translations = {
     dashboard: "Brugerpanel",
     book: "Book",
     order: "Bestil",
-    faq: "FAQ",
     news: "Nyheder",
   },
 };

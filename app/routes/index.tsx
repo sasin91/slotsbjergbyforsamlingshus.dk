@@ -1,6 +1,8 @@
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import {
+  AtSymbolIcon,
   MenuIcon,
+  PhoneOutgoingIcon,
   QuestionMarkCircleIcon,
   ShoppingBagIcon,
   XIcon,
@@ -14,12 +16,12 @@ import React, { Fragment, useState } from "react";
 import { IntlDate } from "~/components/IntlDate";
 import takeAway from "~/images/annemedkolde.jpg";
 import dinnerParty from "~/images/borddaekning1.jpg";
-import footerImageTwo from "~/images/bund2.jpg";
-import footerImageOne from "~/images/bundloeber.jpg";
 import cakes from "~/images/fotokager.jpg";
-import banner from "~/images/nytoppiccy.jpg";
+import banner from "~/images/borddaekning1.jpg";
 import { getPosts } from "~/models/post.server";
 import { useOptionalUser, routes, translations } from "~/utils";
+import Footer from "~/components/Footer";
+import { AppName, Email, Phone } from "~/config";
 
 const navigation = {
   categories: [
@@ -91,7 +93,7 @@ export default function Index() {
   const [cartOpen, setCartOpen] = useState(false);
 
   return (
-    <div className="bg-white">
+    <div className="bg-gray-50">
       {/* Mobile menu */}
       <Transition.Root show={open} as={Fragment}>
         <Dialog as="div" className="relative z-40 lg:hidden" onClose={setOpen}>
@@ -124,7 +126,7 @@ export default function Index() {
                     className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
                     onClick={() => setOpen(false)}
                   >
-                    <span className="sr-only">Close menu</span>
+                    <span className="sr-only">Luk menu</span>
                     <XIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
@@ -397,24 +399,38 @@ export default function Index() {
                   </div>
 
                   <div className="flex flex-1 items-center justify-end">
-                    <div className="flex items-center lg:ml-8">
+                    <div className="flex items-center lg:ml-8 lg:space-x-2">
                       {/* Help */}
-                      <Link
-                        to={routes.faq}
+                      <a
                         className="p-2 text-white lg:hidden"
+                        href={`tel:${Phone}`}
                       >
-                        <span className="sr-only">Help</span>
-                        <QuestionMarkCircleIcon
-                          className="h-6 w-6"
-                          aria-hidden="true"
-                        />
-                      </Link>
-                      <Link
-                        to={routes.faq}
-                        className="hidden text-sm font-medium text-white lg:block"
+                        <span className="sr-only">
+                          ring til Anne på 2014 4080
+                        </span>
+                        <PhoneOutgoingIcon className="h-6 w-6" />
+                      </a>
+                      <a
+                        href={`tel:${Phone}`}
+                        className="hidden text-sm font-medium text-white lg:flex lg:justify-evenly lg:space-x-1"
                       >
-                        {translations.routes.faq}
-                      </Link>
+                        <PhoneOutgoingIcon className="h-6 w-6" />
+                        <span>{Phone}</span>
+                      </a>
+
+                      <a
+                        className="p-2 text-white lg:hidden"
+                        href={`email:${Email}`}
+                      >
+                        <AtSymbolIcon className="h-6 w-6" />
+                      </a>
+                      <a
+                        href={`email:${Email}`}
+                        className="hidden text-sm font-medium text-white lg:flex lg:justify-evenly lg:space-x-1"
+                      >
+                        <AtSymbolIcon className="h-6 w-6" />
+                        <span>{Email}</span>
+                      </a>
 
                       {/* Cart */}
                       <div className="ml-4 flow-root lg:ml-8">
@@ -442,7 +458,7 @@ export default function Index() {
 
         <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-32 text-center sm:py-64 lg:px-0">
           <h1 className="text-4xl font-extrabold tracking-tight text-white lg:text-6xl">
-            Slots Bjergby Festhus
+            {AppName}
           </h1>
           <p className="mt-4 text-xl text-white">
             danner rammen om mange store private fester såvel som til lokale
@@ -560,31 +576,7 @@ export default function Index() {
         </section>
       </main>
 
-      <footer aria-labelledby="footer-heading" className="bg-gray-50 pt-2">
-        <h2 className="text-center text-lg text-gray-700" id="footer-heading">
-          Slots Bjergby Festhus
-        </h2>
-        <p className="text-center text-sm text-gray-500">
-          Slots Bjergbyvej 42 - 4200 Slagelse
-        </p>
-        <p className="text-center text-sm italic text-gray-500">
-          Stedet hvor der mødes - og fejres!
-        </p>
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between">
-            {/* Image section */}
-            <img src={footerImageOne} alt="" className="" />
-            <img src={footerImageTwo} alt="" className="" />
-          </div>
-
-          <div className="border-t border-gray-100 py-10 text-center">
-            <p className="text-sm text-gray-500">
-              &copy; Slots Bjergby Festhus {new Date().getFullYear()}
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
