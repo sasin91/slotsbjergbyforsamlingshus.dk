@@ -7,7 +7,7 @@ import {
   ShoppingBagIcon,
   XIcon,
 } from "@heroicons/react/outline";
-import type { Post } from "@prisma/client";
+import type { Category, Post } from "@prisma/client";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
@@ -22,51 +22,82 @@ import { getPosts } from "~/models/post.server";
 import { useOptionalUser, routes, translations } from "~/utils";
 import Footer from "~/components/Footer";
 import { AppName, Email, Phone } from "~/config";
+import { getCategories } from "~/models/category.server";
 
-const navigation = {
+const collections = [
+  {
+    name: "Take away",
+    featured: [
+      {
+        name: "Take away",
+        href: routes.order,
+        imageSrc: takeAway,
+        imageAlt: "Anne med ”Take Away”",
+        description:
+          "Anne laver også den lækreste ”Take Away” mad og har mange tilbud for alle Slots Bjergby borgere - og alle andre selvfølgelig! Derfor, hold øje med Annes hjemmeside – og endelig lad dig friste over evne!",
+      },
+      {
+        name: "Kager ud af huset",
+        href: routes.order,
+        imageSrc: cakes,
+        imageAlt: "Kage kollage",
+        description: "Anne er altid klar til at lave din egne personlige kage.",
+      },
+    ],
+  },
+  {
+    name: "Book festhuset",
+    featured: [
+      {
+        name: "Hold dit arrangement hos os",
+        href: routes.book,
+        imageSrc: dinnerParty,
+        imageAlt: "Festlige omgivelser",
+        description:
+          "Vi sørger for de beste omgivelser for dit møde eller arrangement",
+      },
+      {
+        name: "En fest hos os?",
+        href: routes.book,
+        imageSrc: dinnerParty,
+        imageAlt: "Festlige omgivelser",
+        description:
+          "Lad os stå for en uforglemmelig dag i festlige omgivelser",
+      },
+    ],
+  },
+];
+
+const navigation: { categories: { name: string; href: string }[] } = {
   categories: [
-    {
-      name: "Take away",
-      featured: [
-        {
-          name: "Mad ud af huset",
-          href: routes.order,
-          imageSrc: takeAway,
-          imageAlt: "Anne med ”Take Away”",
-          description:
-            "Anne laver også den lækreste ”Take Away” mad og har mange tilbud for alle Slots Bjergby borgere - og alle andre selvfølgelig! Derfor, hold øje med Annes hjemmeside – og endelig lad dig friste over evne!",
-        },
-        {
-          name: "Kager ud af huset",
-          href: routes.order,
-          imageSrc: cakes,
-          imageAlt: "Kage kollage",
-          description:
-            "Anne er altid klar til at lave din egne personlige kage.",
-        },
-      ],
-    },
-    {
-      name: "Book festhuset",
-      featured: [
-        {
-          name: "Hold dit arrangement hos os",
-          href: routes.book,
-          imageSrc: dinnerParty,
-          imageAlt: "Festlige omgivelser",
-          description:
-            "Vi sørger for de beste omgivelser for dit møde eller arrangement",
-        },
-        {
-          name: "En fest hos os?",
-          href: routes.book,
-          imageSrc: dinnerParty,
-          imageAlt: "Festlige omgivelser",
-          description:
-            "Lad os stå for en uforglemmelig dag i festlige omgivelser",
-        },
-      ],
-    },
+    // {
+    //   name: "Arrangementer",
+    //   featured: [
+    //     { name: "Casual", href: "#" },
+    //     { name: "Boxers", href: "#" },
+    //     { name: "Outdoor", href: "#" },
+    //   ],
+    //   collection: [
+    //     { name: "Everything", href: "#" },
+    //     { name: "Core", href: "#" },
+    //     { name: "New Arrivals", href: "#" },
+    //     { name: "Sale", href: "#" },
+    //   ],
+    //   categories: [
+    //     { name: "Artwork Tees", href: "#" },
+    //     { name: "Pants", href: "#" },
+    //     { name: "Accessories", href: "#" },
+    //     { name: "Boxers", href: "#" },
+    //     { name: "Basic Tees", href: "#" },
+    //   ],
+    //   brands: [
+    //     { name: "Significant Other", href: "#" },
+    //     { name: "My Way", href: "#" },
+    //     { name: "Counterfeit", href: "#" },
+    //     { name: "Re-Arranged", href: "#" },
+    //     { name: "Full Nelson", href: "#" },
+    //   ],
+    // },
   ],
 };
 
@@ -76,21 +107,28 @@ function classNames(...classes: string[]) {
 
 type LoaderData = {
   posts: Post[];
+  categories: Category[];
 };
 
 export const loader: LoaderFunction = async () => {
   const posts = await getPosts();
-  if (!posts) {
-    throw new Response("Not Found", { status: 404 });
-  }
-  return json<LoaderData>({ posts });
+  const categories = await getCategories();
+
+  return json<LoaderData>({ posts, categories });
 };
 
 export default function Index() {
   const user = useOptionalUser();
-  const { posts } = useLoaderData<LoaderData>();
+  const { posts, categories } = useLoaderData<LoaderData>();
   const [open, setOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+
+  navigation.categories.push(
+    ...categories.map((category) => ({
+      name: category.title,
+      href: `/menu-kort/${category.slug}`,
+    }))
+  );
 
   return (
     <div className="bg-gray-50">
@@ -119,22 +157,22 @@ export default function Index() {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-12 shadow-xl">
+              <Dialog.Panel className="relative flex flex-col w-full max-w-xs pb-12 overflow-y-auto bg-white shadow-xl">
                 <div className="flex px-4 pt-5 pb-2">
                   <button
                     type="button"
-                    className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
+                    className="inline-flex items-center justify-center p-2 -m-2 text-gray-400 rounded-md"
                     onClick={() => setOpen(false)}
                   >
                     <span className="sr-only">Luk menu</span>
-                    <XIcon className="h-6 w-6" aria-hidden="true" />
+                    <XIcon className="w-6 h-6" aria-hidden="true" />
                   </button>
                 </div>
 
                 {/* Links */}
                 <Tab.Group as="div" className="mt-2">
                   <div className="border-b border-gray-200">
-                    <Tab.List className="-mb-px flex space-x-8 px-4">
+                    <Tab.List className="flex px-4 -mb-px space-x-8">
                       {navigation.categories.map((category) => (
                         <Tab
                           key={category.name}
@@ -153,40 +191,120 @@ export default function Index() {
                     </Tab.List>
                   </div>
                   <Tab.Panels as={Fragment}>
-                    {navigation.categories.map((category) => (
+                    {navigation.categories.map((category, categoryIdx) => (
                       <Tab.Panel
                         key={category.name}
-                        className="space-y-12 px-4 py-6"
+                        className="px-4 pt-10 pb-6 space-y-12"
                       >
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-10">
-                          {category.featured.map((item) => (
-                            <div key={item.name} className="group relative">
-                              <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-md bg-gray-100 group-hover:opacity-75">
-                                <img
-                                  src={item.imageSrc}
-                                  alt={item.imageAlt}
-                                  className="object-cover object-center"
-                                />
-                              </div>
-                              <a
-                                href={item.href}
-                                className="mt-6 block text-sm font-medium text-gray-900"
+                        <div className="grid items-start grid-cols-1 gap-y-10 gap-x-6">
+                          <div className="grid grid-cols-1 gap-y-10 gap-x-6">
+                            <div>
+                              <p
+                                id={`mobile-take-away-heading-${categoryIdx}`}
+                                className="font-medium text-gray-900"
                               >
-                                <span
-                                  className="absolute inset-0 z-10"
-                                  aria-hidden="true"
-                                />
-                                {item.name}
-                              </a>
+                                Take Away
+                              </p>
+                              <ul
+                                role="list"
+                                aria-labelledby={`mobile-take-away-heading-${categoryIdx}`}
+                                className="mt-6 space-y-6"
+                              >
+                                {category.takeAway.map((item) => (
+                                  <li key={item.name} className="flex">
+                                    <a
+                                      href={item.href}
+                                      className="text-gray-500"
+                                    >
+                                      {item.name}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
-                          ))}
+                            <div>
+                              <p
+                                id="mobile-categories-heading"
+                                className="font-medium text-gray-900"
+                              >
+                                Categories
+                              </p>
+                              <ul
+                                role="list"
+                                aria-labelledby="mobile-categories-heading"
+                                className="mt-6 space-y-6"
+                              >
+                                {category.categories.map((item) => (
+                                  <li key={item.name} className="flex">
+                                    <a
+                                      href={item.href}
+                                      className="text-gray-500"
+                                    >
+                                      {item.name}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 gap-y-10 gap-x-6">
+                            <div>
+                              <p
+                                id="mobile-collection-heading"
+                                className="font-medium text-gray-900"
+                              >
+                                Collection
+                              </p>
+                              <ul
+                                role="list"
+                                aria-labelledby="mobile-collection-heading"
+                                className="mt-6 space-y-6"
+                              >
+                                {category.collection.map((item) => (
+                                  <li key={item.name} className="flex">
+                                    <a
+                                      href={item.href}
+                                      className="text-gray-500"
+                                    >
+                                      {item.name}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div>
+                              <p
+                                id="mobile-brand-heading"
+                                className="font-medium text-gray-900"
+                              >
+                                Brands
+                              </p>
+                              <ul
+                                role="list"
+                                aria-labelledby="mobile-brand-heading"
+                                className="mt-6 space-y-6"
+                              >
+                                {category.brands.map((item) => (
+                                  <li key={item.name} className="flex">
+                                    <a
+                                      href={item.href}
+                                      className="text-gray-500"
+                                    >
+                                      {item.name}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
                         </div>
                       </Tab.Panel>
                     ))}
                   </Tab.Panels>
                 </Tab.Group>
                 {user ? (
-                  <div className="space-y-6 border-t border-gray-200 px-4 py-6">
+                  <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
                       <Link
                         to={routes.dashboard}
@@ -197,7 +315,7 @@ export default function Index() {
                       <Form action={routes.signOut} method="post">
                         <button
                           type="submit"
-                          className="rounded bg-slate-600 px-4 py-2 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
+                          className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
                         >
                           {translations.routes.signOut}
                         </button>
@@ -205,7 +323,7 @@ export default function Index() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6 border-t border-gray-200 px-4 py-6">
+                  <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
                       <Link
                         to={routes.signUp}
@@ -237,7 +355,7 @@ export default function Index() {
           <img
             src={banner}
             alt=""
-            className="h-full w-full object-cover object-center"
+            className="object-cover object-center w-full h-full"
           />
         </div>
         <div
@@ -249,7 +367,7 @@ export default function Index() {
           <nav aria-label="Top">
             {/* Top navigation */}
             <div className="bg-gray-900">
-              <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 {/* Spacer */}
                 <div>&nbsp;</div>
 
@@ -265,7 +383,7 @@ export default function Index() {
                       <Form action={routes.signOut} method="post">
                         <button
                           type="submit"
-                          className="rounded bg-slate-600 px-4 py-2 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
+                          className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
                         >
                           {translations.routes.signOut}
                         </button>
@@ -293,26 +411,26 @@ export default function Index() {
 
             {/* Secondary navigation */}
             <div className="bg-white bg-opacity-10 backdrop-blur-md backdrop-filter">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex h-16 items-center justify-between">
+              <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
                   <div className="hidden h-full lg:flex">
-                    {/* Flyout menus */}
-                    <Popover.Group className="inset-x-0 bottom-0 px-4">
-                      <div className="flex h-full justify-center space-x-8">
-                        {navigation.categories.map((category) => (
+                    {/* Mega menus */}
+                    <Popover.Group className="ml-8">
+                      <div className="flex justify-center h-full space-x-8">
+                        {navigation.categories.map((category, categoryIdx) => (
                           <Popover key={category.name} className="flex">
                             {({ open }) => (
                               <>
                                 <div className="relative flex">
-                                  <Popover.Button className="relative z-10 flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out">
+                                  <Popover.Button
+                                    className={classNames(
+                                      open
+                                        ? "border-white text-white"
+                                        : "border-transparent text-white",
+                                      "relative z-10 -mb-px flex items-center border-b-2 pt-px text-sm font-medium transition-colors duration-200 ease-out"
+                                    )}
+                                  >
                                     {category.name}
-                                    <span
-                                      className={classNames(
-                                        open ? "bg-white" : "",
-                                        "absolute inset-x-0 -bottom-px h-0.5 transition duration-200 ease-out"
-                                      )}
-                                      aria-hidden="true"
-                                    />
                                   </Popover.Button>
                                 </div>
 
@@ -325,54 +443,135 @@ export default function Index() {
                                   leaveFrom="opacity-100"
                                   leaveTo="opacity-0"
                                 >
-                                  <Popover.Panel className="absolute inset-x-0 top-full z-10 bg-white text-sm text-gray-500">
+                                  <Popover.Panel className="absolute inset-x-0 text-gray-500 top-full sm:text-sm">
                                     {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
                                     <div
-                                      className="absolute inset-0 top-1/2 bg-white shadow"
+                                      className="absolute inset-0 bg-white shadow top-1/2"
                                       aria-hidden="true"
                                     />
-                                    {/* Fake border when menu is open */}
-                                    <div
-                                      className="absolute inset-0 top-0 mx-auto h-px max-w-7xl px-8"
-                                      aria-hidden="true"
-                                    >
-                                      <div
-                                        className={classNames(
-                                          open
-                                            ? "bg-gray-200"
-                                            : "bg-transparent",
-                                          "h-px w-full transition-colors duration-200 ease-out"
-                                        )}
-                                      />
-                                    </div>
 
-                                    <div className="relative">
-                                      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                                        <div className="grid grid-cols-4 gap-y-10 gap-x-8 py-16">
-                                          {category.featured.map((item) => (
-                                            <div
-                                              key={item.name}
-                                              className="group relative"
-                                            >
-                                              <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-md bg-gray-100 group-hover:opacity-75">
-                                                <img
-                                                  src={item.imageSrc}
-                                                  alt={item.imageAlt}
-                                                  className="object-cover object-center"
-                                                />
-                                              </div>
-                                              <a
-                                                href={item.href}
-                                                className="mt-4 block font-medium text-gray-900"
+                                    <div className="relative bg-white">
+                                      <div className="px-8 mx-auto max-w-7xl">
+                                        <div className="grid items-start grid-cols-2 pt-10 pb-12 gap-y-10 gap-x-8">
+                                          <div className="grid grid-cols-2 gap-y-10 gap-x-8">
+                                            <div>
+                                              <p
+                                                id={`desktop-featured-heading-${categoryIdx}`}
+                                                className="font-medium text-gray-900"
                                               >
-                                                <span
-                                                  className="absolute inset-0 z-10"
-                                                  aria-hidden="true"
-                                                />
-                                                {item.name}
-                                              </a>
+                                                Featured
+                                              </p>
+                                              <ul
+                                                role="list"
+                                                aria-labelledby={`desktop-featured-heading-${categoryIdx}`}
+                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                              >
+                                                {category.takeAway.map(
+                                                  (item) => (
+                                                    <li
+                                                      key={item.name}
+                                                      className="flex"
+                                                    >
+                                                      <a
+                                                        href={item.href}
+                                                        className="hover:text-gray-800"
+                                                      >
+                                                        {item.name}
+                                                      </a>
+                                                    </li>
+                                                  )
+                                                )}
+                                              </ul>
                                             </div>
-                                          ))}
+                                            <div>
+                                              <p
+                                                id="desktop-categories-heading"
+                                                className="font-medium text-gray-900"
+                                              >
+                                                Categories
+                                              </p>
+                                              <ul
+                                                role="list"
+                                                aria-labelledby="desktop-categories-heading"
+                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                              >
+                                                {category.categories.map(
+                                                  (item) => (
+                                                    <li
+                                                      key={item.name}
+                                                      className="flex"
+                                                    >
+                                                      <a
+                                                        href={item.href}
+                                                        className="hover:text-gray-800"
+                                                      >
+                                                        {item.name}
+                                                      </a>
+                                                    </li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+                                          </div>
+                                          <div className="grid grid-cols-2 gap-y-10 gap-x-8">
+                                            <div>
+                                              <p
+                                                id="desktop-collection-heading"
+                                                className="font-medium text-gray-900"
+                                              >
+                                                Collection
+                                              </p>
+                                              <ul
+                                                role="list"
+                                                aria-labelledby="desktop-collection-heading"
+                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                              >
+                                                {category.collection.map(
+                                                  (item) => (
+                                                    <li
+                                                      key={item.name}
+                                                      className="flex"
+                                                    >
+                                                      <a
+                                                        href={item.href}
+                                                        className="hover:text-gray-800"
+                                                      >
+                                                        {item.name}
+                                                      </a>
+                                                    </li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+
+                                            <div>
+                                              <p
+                                                id="desktop-brand-heading"
+                                                className="font-medium text-gray-900"
+                                              >
+                                                Brands
+                                              </p>
+                                              <ul
+                                                role="list"
+                                                aria-labelledby="desktop-brand-heading"
+                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                              >
+                                                {category.brands.map((item) => (
+                                                  <li
+                                                    key={item.name}
+                                                    className="flex"
+                                                  >
+                                                    <a
+                                                      href={item.href}
+                                                      className="hover:text-gray-800"
+                                                    >
+                                                      {item.name}
+                                                    </a>
+                                                  </li>
+                                                ))}
+                                              </ul>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
@@ -387,18 +586,18 @@ export default function Index() {
                   </div>
 
                   {/* Mobile menu and search (lg-) */}
-                  <div className="flex flex-1 items-center lg:hidden">
+                  <div className="flex items-center flex-1 lg:hidden">
                     <button
                       type="button"
-                      className="-ml-2 rounded-md bg-white p-2 text-gray-400"
+                      className="p-2 -ml-2 text-gray-400 bg-white rounded-md"
                       onClick={() => setOpen(true)}
                     >
                       <span className="sr-only">Open menu</span>
-                      <MenuIcon className="h-6 w-6" aria-hidden="true" />
+                      <MenuIcon className="w-6 h-6" aria-hidden="true" />
                     </button>
                   </div>
 
-                  <div className="flex flex-1 items-center justify-end">
+                  <div className="flex items-center justify-end flex-1">
                     <div className="flex items-center lg:ml-8 lg:space-x-2">
                       {/* Help */}
                       <a
@@ -408,13 +607,13 @@ export default function Index() {
                         <span className="sr-only">
                           ring til Anne på 2014 4080
                         </span>
-                        <PhoneOutgoingIcon className="h-6 w-6" />
+                        <PhoneOutgoingIcon className="w-6 h-6" />
                       </a>
                       <a
                         href={`tel:${Phone}`}
                         className="hidden text-sm font-medium text-white lg:flex lg:justify-evenly lg:space-x-1"
                       >
-                        <PhoneOutgoingIcon className="h-6 w-6" />
+                        <PhoneOutgoingIcon className="w-6 h-6" />
                         <span>{Phone}</span>
                       </a>
 
@@ -422,24 +621,24 @@ export default function Index() {
                         className="p-2 text-white lg:hidden"
                         href={`email:${Email}`}
                       >
-                        <AtSymbolIcon className="h-6 w-6" />
+                        <AtSymbolIcon className="w-6 h-6" />
                       </a>
                       <a
                         href={`email:${Email}`}
                         className="hidden text-sm font-medium text-white lg:flex lg:justify-evenly lg:space-x-1"
                       >
-                        <AtSymbolIcon className="h-6 w-6" />
+                        <AtSymbolIcon className="w-6 h-6" />
                         <span>{Email}</span>
                       </a>
 
                       {/* Cart */}
-                      <div className="ml-4 flow-root lg:ml-8">
+                      <div className="flow-root ml-4 lg:ml-8">
                         <button
                           onClick={() => setCartOpen(!cartOpen)}
-                          className="group -m-2 flex items-center p-2"
+                          className="flex items-center p-2 -m-2 group"
                         >
                           <ShoppingBagIcon
-                            className="h-6 w-6 flex-shrink-0 text-white"
+                            className="flex-shrink-0 w-6 h-6 text-white"
                             aria-hidden="true"
                           />
                           <span className="ml-2 text-sm font-medium text-white">
@@ -456,7 +655,7 @@ export default function Index() {
           </nav>
         </header>
 
-        <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-32 text-center sm:py-64 lg:px-0">
+        <div className="relative flex flex-col items-center max-w-3xl px-6 py-32 mx-auto text-center sm:py-64 lg:px-0">
           <h1 className="text-4xl font-extrabold tracking-tight text-white lg:text-6xl">
             {AppName}
           </h1>
@@ -481,11 +680,11 @@ export default function Index() {
 
       <main>
         {/* Collection section */}
-        {navigation.categories.map((category) => (
+        {collections.map((category) => (
           <section
             key={category.name}
             aria-labelledby="collection-heading"
-            className="mx-auto max-w-xl px-4 pt-24 sm:px-6 sm:pt-32 lg:max-w-7xl lg:px-8"
+            className="max-w-xl px-4 pt-24 mx-auto sm:px-6 sm:pt-32 lg:max-w-7xl lg:px-8"
           >
             <h2
               id="collection-heading"
@@ -499,16 +698,16 @@ export default function Index() {
                 <a
                   key={collection.name}
                   href={collection.href}
-                  className="group block"
+                  className="block group"
                 >
                   <div
                     aria-hidden="true"
-                    className="aspect-w-3 aspect-h-2 overflow-hidden rounded-lg group-hover:opacity-75 lg:aspect-w-5 lg:aspect-h-6"
+                    className="overflow-hidden rounded-lg aspect-w-3 aspect-h-2 group-hover:opacity-75 lg:aspect-w-5 lg:aspect-h-6"
                   >
                     <img
                       src={collection.imageSrc}
                       alt={collection.imageAlt}
-                      className="h-full w-full object-cover object-center"
+                      className="object-cover object-center w-full h-full"
                     />
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-gray-900">
@@ -524,7 +723,7 @@ export default function Index() {
         ))}
 
         <section aria-labelledby="trending-heading">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:pt-32">
+          <div className="px-4 py-24 mx-auto max-w-7xl sm:px-6 sm:py-32 lg:px-8 lg:pt-32">
             <div className="md:flex md:items-center md:justify-between">
               <h2
                 id="favorites-heading"
@@ -540,15 +739,15 @@ export default function Index() {
               </Link>
             </div>
 
-            <div className="bg-white px-4 pt-16 pb-20 sm:px-6 lg:px-8 lg:pt-24 lg:pb-28">
-              <div className="relative mx-auto max-w-lg divide-y-2 divide-gray-200 lg:max-w-7xl">
-                <div className="mt-6 grid gap-16 pt-10 lg:grid-cols-2 lg:gap-x-5 lg:gap-y-12">
+            <div className="px-4 pt-16 pb-20 bg-white sm:px-6 lg:px-8 lg:pt-24 lg:pb-28">
+              <div className="relative max-w-lg mx-auto divide-y-2 divide-gray-200 lg:max-w-7xl">
+                <div className="grid gap-16 pt-10 mt-6 lg:grid-cols-2 lg:gap-x-5 lg:gap-y-12">
                   {posts.map((post) => (
                     <div key={post.title}>
                       <p className="text-sm text-gray-500">
                         <IntlDate date={post.createdAt} />
                       </p>
-                      <Link to={post.slug} className="mt-2 block">
+                      <Link to={post.slug} className="block mt-2">
                         <p className="text-xl font-semibold text-gray-900">
                           {post.title}
                         </p>

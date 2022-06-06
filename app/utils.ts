@@ -10,6 +10,9 @@ export const routes = {
   signUp: "/opret",
   signOut: "/log-ud",
   dashboard: "/brugerpanel",
+
+  menu: "/menu-kort",
+
   book: "/book",
   order: "/bestil",
   news: "/nyheder",
