@@ -11,9 +11,9 @@ async function createPosts() {
       markdown: `
   # Fra Festhuset 2022
   
-  Spørg bare Forsamlingshusets forpagter Anne Mortensen om jeres ønsker ang. fremtidig arrangementer, fester osv. - eller udfylde forespørgselsformularen her på websiten.
-  **Anne laver også den lækreste ”Take Away” mad og har mange tilbud for alle Slots Bjergby borgere - og alle andre selvfølgelig! Derfor, hold øje med Annes hjemmeside – og endelig lad dig friste over evne!** Linket er: [slotsbjergbyforsamlingshus.dk](https://slotsbjergbyforsamlingshus.dk)
-  ![Anne med smørbrød](https://www.slotsbjergbyforsamlingshus.dk/annemedkolde.jpg "Anne med smørbrød")
+  Spørg bare Festhusets forpagter Anne Mortensen om jeres ønsker ang. fremtidig arrangementer, fester osv. - eller udfylde forespørgselsformularen her på websiten.
+  **Anne laver også den lækreste ”Take Away” mad og har mange tilbud for alle Slots Bjergby borgere - og alle andre selvfølgelig! Derfor, hold øje med Annes hjemmeside – og endelig lad dig friste over evne!** Linket er: [slotsbjergbyfesthus.dk](https://slotsbjergbyfesthus.dk)
+  ![Anne med smørbrød](https://www.slotsbjergbyfesthus.dk/annemedkolde.jpg "Anne med smørbrød")
   Du kan også se de nyeste tilbud også på Facebook med alle mulige retter fra stege til småkager
 og lad dig inspirerer [www.facebook.com/Slots-Bjergby-Festhus](facebook.com/Slots-Bjergby-Festhus)
 Bestil hos Anne tlf. 2014 4080 - email: <kontakt@slotsbjergbyfesthus.dk>

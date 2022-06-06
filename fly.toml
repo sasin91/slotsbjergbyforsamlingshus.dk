@@ -1,4 +1,4 @@
-app = "slotsbjergbyforsamlingshus-dk-090b"
+app = "slotsbjergbyfesthus-dk-090b"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]

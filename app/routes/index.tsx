@@ -117,22 +117,22 @@ export default function Index() {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex flex-col w-full max-w-xs pb-12 overflow-y-auto bg-white shadow-xl">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-12 shadow-xl">
                 <div className="flex px-4 pt-5 pb-2">
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center p-2 -m-2 text-gray-400 rounded-md"
+                    className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
                     onClick={() => setOpen(false)}
                   >
                     <span className="sr-only">Close menu</span>
-                    <XIcon className="w-6 h-6" aria-hidden="true" />
+                    <XIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
 
                 {/* Links */}
                 <Tab.Group as="div" className="mt-2">
                   <div className="border-b border-gray-200">
-                    <Tab.List className="flex px-4 -mb-px space-x-8">
+                    <Tab.List className="-mb-px flex space-x-8 px-4">
                       {navigation.categories.map((category) => (
                         <Tab
                           key={category.name}
@@ -154,12 +154,12 @@ export default function Index() {
                     {navigation.categories.map((category) => (
                       <Tab.Panel
                         key={category.name}
-                        className="px-4 py-6 space-y-12"
+                        className="space-y-12 px-4 py-6"
                       >
                         <div className="grid grid-cols-2 gap-x-4 gap-y-10">
                           {category.featured.map((item) => (
-                            <div key={item.name} className="relative group">
-                              <div className="overflow-hidden bg-gray-100 rounded-md aspect-w-1 aspect-h-1 group-hover:opacity-75">
+                            <div key={item.name} className="group relative">
+                              <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-md bg-gray-100 group-hover:opacity-75">
                                 <img
                                   src={item.imageSrc}
                                   alt={item.imageAlt}
@@ -168,7 +168,7 @@ export default function Index() {
                               </div>
                               <a
                                 href={item.href}
-                                className="block mt-6 text-sm font-medium text-gray-900"
+                                className="mt-6 block text-sm font-medium text-gray-900"
                               >
                                 <span
                                   className="absolute inset-0 z-10"
@@ -184,7 +184,7 @@ export default function Index() {
                   </Tab.Panels>
                 </Tab.Group>
                 {user ? (
-                  <div className="px-4 py-6 space-y-6 border-t border-gray-200">
+                  <div className="space-y-6 border-t border-gray-200 px-4 py-6">
                     <div className="flow-root">
                       <Link
                         to={routes.dashboard}
@@ -195,7 +195,7 @@ export default function Index() {
                       <Form action={routes.signOut} method="post">
                         <button
                           type="submit"
-                          className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
+                          className="rounded bg-slate-600 px-4 py-2 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
                         >
                           {translations.routes.signOut}
                         </button>
@@ -203,7 +203,7 @@ export default function Index() {
                     </div>
                   </div>
                 ) : (
-                  <div className="px-4 py-6 space-y-6 border-t border-gray-200">
+                  <div className="space-y-6 border-t border-gray-200 px-4 py-6">
                     <div className="flow-root">
                       <Link
                         to={routes.signUp}
@@ -235,7 +235,7 @@ export default function Index() {
           <img
             src={banner}
             alt=""
-            className="object-cover object-center w-full h-full"
+            className="h-full w-full object-cover object-center"
           />
         </div>
         <div
@@ -247,7 +247,7 @@ export default function Index() {
           <nav aria-label="Top">
             {/* Top navigation */}
             <div className="bg-gray-900">
-              <div className="flex items-center justify-between h-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+              <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 {/* Spacer */}
                 <div>&nbsp;</div>
 
@@ -263,7 +263,7 @@ export default function Index() {
                       <Form action={routes.signOut} method="post">
                         <button
                           type="submit"
-                          className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
+                          className="rounded bg-slate-600 px-4 py-2 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
                         >
                           {translations.routes.signOut}
                         </button>
@@ -291,12 +291,12 @@ export default function Index() {
 
             {/* Secondary navigation */}
             <div className="bg-white bg-opacity-10 backdrop-blur-md backdrop-filter">
-              <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="flex h-16 items-center justify-between">
                   <div className="hidden h-full lg:flex">
                     {/* Flyout menus */}
                     <Popover.Group className="inset-x-0 bottom-0 px-4">
-                      <div className="flex justify-center h-full space-x-8">
+                      <div className="flex h-full justify-center space-x-8">
                         {navigation.categories.map((category) => (
                           <Popover key={category.name} className="flex">
                             {({ open }) => (
@@ -323,15 +323,15 @@ export default function Index() {
                                   leaveFrom="opacity-100"
                                   leaveTo="opacity-0"
                                 >
-                                  <Popover.Panel className="absolute inset-x-0 z-10 text-sm text-gray-500 bg-white top-full">
+                                  <Popover.Panel className="absolute inset-x-0 top-full z-10 bg-white text-sm text-gray-500">
                                     {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
                                     <div
-                                      className="absolute inset-0 bg-white shadow top-1/2"
+                                      className="absolute inset-0 top-1/2 bg-white shadow"
                                       aria-hidden="true"
                                     />
                                     {/* Fake border when menu is open */}
                                     <div
-                                      className="absolute inset-0 top-0 h-px px-8 mx-auto max-w-7xl"
+                                      className="absolute inset-0 top-0 mx-auto h-px max-w-7xl px-8"
                                       aria-hidden="true"
                                     >
                                       <div
@@ -345,14 +345,14 @@ export default function Index() {
                                     </div>
 
                                     <div className="relative">
-                                      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                                        <div className="grid grid-cols-4 py-16 gap-y-10 gap-x-8">
+                                      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                                        <div className="grid grid-cols-4 gap-y-10 gap-x-8 py-16">
                                           {category.featured.map((item) => (
                                             <div
                                               key={item.name}
-                                              className="relative group"
+                                              className="group relative"
                                             >
-                                              <div className="overflow-hidden bg-gray-100 rounded-md aspect-w-1 aspect-h-1 group-hover:opacity-75">
+                                              <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-md bg-gray-100 group-hover:opacity-75">
                                                 <img
                                                   src={item.imageSrc}
                                                   alt={item.imageAlt}
@@ -361,7 +361,7 @@ export default function Index() {
                                               </div>
                                               <a
                                                 href={item.href}
-                                                className="block mt-4 font-medium text-gray-900"
+                                                className="mt-4 block font-medium text-gray-900"
                                               >
                                                 <span
                                                   className="absolute inset-0 z-10"
@@ -385,18 +385,18 @@ export default function Index() {
                   </div>
 
                   {/* Mobile menu and search (lg-) */}
-                  <div className="flex items-center flex-1 lg:hidden">
+                  <div className="flex flex-1 items-center lg:hidden">
                     <button
                       type="button"
-                      className="p-2 -ml-2 text-gray-400 bg-white rounded-md"
+                      className="-ml-2 rounded-md bg-white p-2 text-gray-400"
                       onClick={() => setOpen(true)}
                     >
                       <span className="sr-only">Open menu</span>
-                      <MenuIcon className="w-6 h-6" aria-hidden="true" />
+                      <MenuIcon className="h-6 w-6" aria-hidden="true" />
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-end flex-1">
+                  <div className="flex flex-1 items-center justify-end">
                     <div className="flex items-center lg:ml-8">
                       {/* Help */}
                       <Link
@@ -405,7 +405,7 @@ export default function Index() {
                       >
                         <span className="sr-only">Help</span>
                         <QuestionMarkCircleIcon
-                          className="w-6 h-6"
+                          className="h-6 w-6"
                           aria-hidden="true"
                         />
                       </Link>
@@ -417,13 +417,13 @@ export default function Index() {
                       </Link>
 
                       {/* Cart */}
-                      <div className="flow-root ml-4 lg:ml-8">
+                      <div className="ml-4 flow-root lg:ml-8">
                         <button
                           onClick={() => setCartOpen(!cartOpen)}
-                          className="flex items-center p-2 -m-2 group"
+                          className="group -m-2 flex items-center p-2"
                         >
                           <ShoppingBagIcon
-                            className="flex-shrink-0 w-6 h-6 text-white"
+                            className="h-6 w-6 flex-shrink-0 text-white"
                             aria-hidden="true"
                           />
                           <span className="ml-2 text-sm font-medium text-white">
@@ -440,9 +440,9 @@ export default function Index() {
           </nav>
         </header>
 
-        <div className="relative flex flex-col items-center max-w-3xl px-6 py-32 mx-auto text-center sm:py-64 lg:px-0">
+        <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-32 text-center sm:py-64 lg:px-0">
           <h1 className="text-4xl font-extrabold tracking-tight text-white lg:text-6xl">
-            Slots Bjergby Forsamlingshus/Festhus
+            Slots Bjergby Festhus
           </h1>
           <p className="mt-4 text-xl text-white">
             danner rammen om mange store private fester såvel som til lokale
@@ -469,7 +469,7 @@ export default function Index() {
           <section
             key={category.name}
             aria-labelledby="collection-heading"
-            className="max-w-xl px-4 pt-24 mx-auto sm:px-6 sm:pt-32 lg:max-w-7xl lg:px-8"
+            className="mx-auto max-w-xl px-4 pt-24 sm:px-6 sm:pt-32 lg:max-w-7xl lg:px-8"
           >
             <h2
               id="collection-heading"
@@ -483,16 +483,16 @@ export default function Index() {
                 <a
                   key={collection.name}
                   href={collection.href}
-                  className="block group"
+                  className="group block"
                 >
                   <div
                     aria-hidden="true"
-                    className="overflow-hidden rounded-lg aspect-w-3 aspect-h-2 group-hover:opacity-75 lg:aspect-w-5 lg:aspect-h-6"
+                    className="aspect-w-3 aspect-h-2 overflow-hidden rounded-lg group-hover:opacity-75 lg:aspect-w-5 lg:aspect-h-6"
                   >
                     <img
                       src={collection.imageSrc}
                       alt={collection.imageAlt}
-                      className="object-cover object-center w-full h-full"
+                      className="h-full w-full object-cover object-center"
                     />
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-gray-900">
@@ -508,7 +508,7 @@ export default function Index() {
         ))}
 
         <section aria-labelledby="trending-heading">
-          <div className="px-4 py-24 mx-auto max-w-7xl sm:px-6 sm:py-32 lg:px-8 lg:pt-32">
+          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:pt-32">
             <div className="md:flex md:items-center md:justify-between">
               <h2
                 id="favorites-heading"
@@ -524,15 +524,15 @@ export default function Index() {
               </Link>
             </div>
 
-            <div className="px-4 pt-16 pb-20 bg-white sm:px-6 lg:px-8 lg:pt-24 lg:pb-28">
-              <div className="relative max-w-lg mx-auto divide-y-2 divide-gray-200 lg:max-w-7xl">
-                <div className="grid gap-16 pt-10 mt-6 lg:grid-cols-2 lg:gap-x-5 lg:gap-y-12">
+            <div className="bg-white px-4 pt-16 pb-20 sm:px-6 lg:px-8 lg:pt-24 lg:pb-28">
+              <div className="relative mx-auto max-w-lg divide-y-2 divide-gray-200 lg:max-w-7xl">
+                <div className="mt-6 grid gap-16 pt-10 lg:grid-cols-2 lg:gap-x-5 lg:gap-y-12">
                   {posts.map((post) => (
                     <div key={post.title}>
                       <p className="text-sm text-gray-500">
                         <IntlDate date={post.createdAt} />
                       </p>
-                      <Link to={post.slug} className="block mt-2">
+                      <Link to={post.slug} className="mt-2 block">
                         <p className="text-xl font-semibold text-gray-900">
                           {post.title}
                         </p>
@@ -560,28 +560,27 @@ export default function Index() {
         </section>
       </main>
 
-      <footer aria-labelledby="footer-heading" className="pt-2 bg-gray-50">
-        <h2 className="text-lg text-center text-gray-700" id="footer-heading">
-          Slots Bjergby Forsamlingshus/Festhus
+      <footer aria-labelledby="footer-heading" className="bg-gray-50 pt-2">
+        <h2 className="text-center text-lg text-gray-700" id="footer-heading">
+          Slots Bjergby Festhus
         </h2>
-        <p className="text-sm text-center text-gray-500">
+        <p className="text-center text-sm text-gray-500">
           Slots Bjergbyvej 42 - 4200 Slagelse
         </p>
-        <p className="text-sm italic text-center text-gray-500">
+        <p className="text-center text-sm italic text-gray-500">
           Stedet hvor der mødes - og fejres!
         </p>
 
-        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between">
             {/* Image section */}
             <img src={footerImageOne} alt="" className="" />
             <img src={footerImageTwo} alt="" className="" />
           </div>
 
-          <div className="py-10 text-center border-t border-gray-100">
+          <div className="border-t border-gray-100 py-10 text-center">
             <p className="text-sm text-gray-500">
-              &copy; Slots Bjergby Forsamlingshus/Festhus{" "}
-              {new Date().getFullYear()}
+              &copy; Slots Bjergby Festhus {new Date().getFullYear()}
             </p>
           </div>
         </div>
