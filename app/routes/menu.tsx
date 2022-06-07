@@ -21,6 +21,7 @@ import Logo from "~/components/Logo";
 import ProductSearchDialog from "~/components/ProductSearchDialog";
 import TopNavigation from "~/components/TopNavigation";
 import { AppName } from "~/config";
+import useKey from "~/hooks/useKey";
 import type { Category } from "~/models/category.server";
 import { getCategories } from "~/models/category.server";
 import { classNames, routes, translations, useOptionalUser } from "~/utils";
@@ -232,6 +233,10 @@ export default function MenuPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  useKey(
+    (event) => event.ctrlKey && event.key === "k",
+    () => setSearchDialogOpen(true)
+  );
 
   return (
     <div className="bg-gray-50">
