@@ -6,30 +6,37 @@ import type { User } from "~/models/user.server";
 const DEFAULT_REDIRECT = "/";
 
 export const routes = {
+  index: "/",
+
   signIn: "/log-ind",
   signUp: "/opret",
   signOut: "/log-ud",
   dashboard: "/brugerpanel",
 
-  menu: "/menu-kort",
-
-  book: "/book",
-  order: "/bestil",
+  menu: "/menu",
+  arrangements: "/arrangementer",
+  checkout: "/kassen",
   news: "/nyheder",
   privacy: "/privatliv",
 };
 
 export const translations = {
   routes: {
+    index: "Forside",
     signIn: "Log ind",
     signUp: "Opret konto",
     signOut: "Log ud",
     dashboard: "Brugerpanel",
-    book: "Book",
-    order: "Bestil",
+    menu: "Menu kort",
+    arrangements: "Arrangementer",
+    checkout: "Kassen",
     news: "Nyheder",
   },
 };
+
+export function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 /**
  * This should be used any time the redirect path is user-provided

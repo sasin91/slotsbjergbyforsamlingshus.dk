@@ -1,138 +1,49 @@
-import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   AtSymbolIcon,
   MenuIcon,
   PhoneOutgoingIcon,
-  QuestionMarkCircleIcon,
-  ShoppingBagIcon,
   XIcon,
 } from "@heroicons/react/outline";
-import type { Category, Post } from "@prisma/client";
+import type { Post } from "@prisma/client";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { marked } from "marked";
-import React, { Fragment, useState } from "react";
+import { Fragment, useState } from "react";
+import CartPopover from "~/components/CartPopover";
+import Footer from "~/components/Footer";
 import { IntlDate } from "~/components/IntlDate";
-import takeAway from "~/images/annemedkolde.jpg";
-import dinnerParty from "~/images/borddaekning1.jpg";
-import cakes from "~/images/fotokager.jpg";
+import TopNavigation from "~/components/TopNavigation";
+import { AppName, Email, Phone } from "~/config";
 import banner from "~/images/borddaekning1.jpg";
 import { getPosts } from "~/models/post.server";
-import { useOptionalUser, routes, translations } from "~/utils";
-import Footer from "~/components/Footer";
-import { AppName, Email, Phone } from "~/config";
-import { getCategories } from "~/models/category.server";
+import { routes, translations, useOptionalUser } from "~/utils";
 
-const collections = [
-  {
-    name: "Take away",
-    featured: [
-      {
-        name: "Take away",
-        href: routes.order,
-        imageSrc: takeAway,
-        imageAlt: "Anne med ”Take Away”",
-        description:
-          "Anne laver også den lækreste ”Take Away” mad og har mange tilbud for alle Slots Bjergby borgere - og alle andre selvfølgelig! Derfor, hold øje med Annes hjemmeside – og endelig lad dig friste over evne!",
-      },
-      {
-        name: "Kager ud af huset",
-        href: routes.order,
-        imageSrc: cakes,
-        imageAlt: "Kage kollage",
-        description: "Anne er altid klar til at lave din egne personlige kage.",
-      },
-    ],
-  },
-  {
-    name: "Book festhuset",
-    featured: [
-      {
-        name: "Hold dit arrangement hos os",
-        href: routes.book,
-        imageSrc: dinnerParty,
-        imageAlt: "Festlige omgivelser",
-        description:
-          "Vi sørger for de beste omgivelser for dit møde eller arrangement",
-      },
-      {
-        name: "En fest hos os?",
-        href: routes.book,
-        imageSrc: dinnerParty,
-        imageAlt: "Festlige omgivelser",
-        description:
-          "Lad os stå for en uforglemmelig dag i festlige omgivelser",
-      },
-    ],
-  },
-];
-
-const navigation: { categories: { name: string; href: string }[] } = {
-  categories: [
-    // {
-    //   name: "Arrangementer",
-    //   featured: [
-    //     { name: "Casual", href: "#" },
-    //     { name: "Boxers", href: "#" },
-    //     { name: "Outdoor", href: "#" },
-    //   ],
-    //   collection: [
-    //     { name: "Everything", href: "#" },
-    //     { name: "Core", href: "#" },
-    //     { name: "New Arrivals", href: "#" },
-    //     { name: "Sale", href: "#" },
-    //   ],
-    //   categories: [
-    //     { name: "Artwork Tees", href: "#" },
-    //     { name: "Pants", href: "#" },
-    //     { name: "Accessories", href: "#" },
-    //     { name: "Boxers", href: "#" },
-    //     { name: "Basic Tees", href: "#" },
-    //   ],
-    //   brands: [
-    //     { name: "Significant Other", href: "#" },
-    //     { name: "My Way", href: "#" },
-    //     { name: "Counterfeit", href: "#" },
-    //     { name: "Re-Arranged", href: "#" },
-    //     { name: "Full Nelson", href: "#" },
-    //   ],
-    // },
+const navigation = {
+  pages: [
+    { name: translations.routes.menu, href: routes.menu },
+    { name: translations.routes.arrangements, href: routes.arrangements },
   ],
 };
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
 type LoaderData = {
   posts: Post[];
-  categories: Category[];
 };
 
 export const loader: LoaderFunction = async () => {
   const posts = await getPosts();
-  const categories = await getCategories();
 
-  return json<LoaderData>({ posts, categories });
+  return json<LoaderData>({ posts });
 };
 
 export default function Index() {
   const user = useOptionalUser();
-  const { posts, categories } = useLoaderData<LoaderData>();
+  const { posts } = useLoaderData<LoaderData>();
   const [open, setOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-
-  navigation.categories.push(
-    ...categories.map((category) => ({
-      name: category.title,
-      href: `/menu-kort/${category.slug}`,
-    }))
-  );
 
   return (
     <div className="bg-gray-50">
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       <Transition.Root show={open} as={Fragment}>
         <Dialog as="div" className="relative z-40 lg:hidden" onClose={setOpen}>
           <Transition.Child
@@ -170,139 +81,17 @@ export default function Index() {
                 </div>
 
                 {/* Links */}
-                <Tab.Group as="div" className="mt-2">
-                  <div className="border-b border-gray-200">
-                    <Tab.List className="flex px-4 -mb-px space-x-8">
-                      {navigation.categories.map((category) => (
-                        <Tab
-                          key={category.name}
-                          className={({ selected }) =>
-                            classNames(
-                              selected
-                                ? "border-indigo-600 text-indigo-600"
-                                : "border-transparent text-gray-900",
-                              "flex-1 whitespace-nowrap border-b-2 py-4 px-1 text-base font-medium"
-                            )
-                          }
-                        >
-                          {category.name}
-                        </Tab>
-                      ))}
-                    </Tab.List>
-                  </div>
-                  <Tab.Panels as={Fragment}>
-                    {navigation.categories.map((category, categoryIdx) => (
-                      <Tab.Panel
-                        key={category.name}
-                        className="px-4 pt-10 pb-6 space-y-12"
-                      >
-                        <div className="grid items-start grid-cols-1 gap-y-10 gap-x-6">
-                          <div className="grid grid-cols-1 gap-y-10 gap-x-6">
-                            <div>
-                              <p
-                                id={`mobile-take-away-heading-${categoryIdx}`}
-                                className="font-medium text-gray-900"
-                              >
-                                Take Away
-                              </p>
-                              <ul
-                                role="list"
-                                aria-labelledby={`mobile-take-away-heading-${categoryIdx}`}
-                                className="mt-6 space-y-6"
-                              >
-                                {category.takeAway.map((item) => (
-                                  <li key={item.name} className="flex">
-                                    <a
-                                      href={item.href}
-                                      className="text-gray-500"
-                                    >
-                                      {item.name}
-                                    </a>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div>
-                              <p
-                                id="mobile-categories-heading"
-                                className="font-medium text-gray-900"
-                              >
-                                Categories
-                              </p>
-                              <ul
-                                role="list"
-                                aria-labelledby="mobile-categories-heading"
-                                className="mt-6 space-y-6"
-                              >
-                                {category.categories.map((item) => (
-                                  <li key={item.name} className="flex">
-                                    <a
-                                      href={item.href}
-                                      className="text-gray-500"
-                                    >
-                                      {item.name}
-                                    </a>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-1 gap-y-10 gap-x-6">
-                            <div>
-                              <p
-                                id="mobile-collection-heading"
-                                className="font-medium text-gray-900"
-                              >
-                                Collection
-                              </p>
-                              <ul
-                                role="list"
-                                aria-labelledby="mobile-collection-heading"
-                                className="mt-6 space-y-6"
-                              >
-                                {category.collection.map((item) => (
-                                  <li key={item.name} className="flex">
-                                    <a
-                                      href={item.href}
-                                      className="text-gray-500"
-                                    >
-                                      {item.name}
-                                    </a>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-
-                            <div>
-                              <p
-                                id="mobile-brand-heading"
-                                className="font-medium text-gray-900"
-                              >
-                                Brands
-                              </p>
-                              <ul
-                                role="list"
-                                aria-labelledby="mobile-brand-heading"
-                                className="mt-6 space-y-6"
-                              >
-                                {category.brands.map((item) => (
-                                  <li key={item.name} className="flex">
-                                    <a
-                                      href={item.href}
-                                      className="text-gray-500"
-                                    >
-                                      {item.name}
-                                    </a>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </Tab.Panel>
-                    ))}
-                  </Tab.Panels>
-                </Tab.Group>
+                <div className="mt-2">
+                  {navigation.pages.map((page) => (
+                    <Link
+                      key={page.name}
+                      to={page.href}
+                      className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
+                    >
+                      {page.name}
+                    </Link>
+                  ))}
+                </div>
                 {user ? (
                   <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
@@ -365,224 +154,26 @@ export default function Index() {
 
         <header className="relative z-10">
           <nav aria-label="Top">
-            {/* Top navigation */}
-            <div className="bg-gray-900">
-              <div className="flex items-center justify-between h-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                {/* Spacer */}
-                <div>&nbsp;</div>
+            <TopNavigation user={user} />
 
-                <div className="flex items-center space-x-6">
-                  {user ? (
-                    <React.Fragment>
-                      <Link
-                        to={routes.dashboard}
-                        className="text-sm font-medium text-white hover:text-gray-100"
-                      >
-                        {translations.routes.dashboard}
-                      </Link>
-                      <Form action={routes.signOut} method="post">
-                        <button
-                          type="submit"
-                          className="px-4 py-2 text-blue-100 rounded bg-slate-600 hover:bg-blue-500 active:bg-blue-600"
-                        >
-                          {translations.routes.signOut}
-                        </button>
-                      </Form>
-                    </React.Fragment>
-                  ) : (
-                    <React.Fragment>
-                      <Link
-                        to={routes.signIn}
-                        className="text-sm font-medium text-white hover:text-gray-100"
-                      >
-                        {translations.routes.signIn}
-                      </Link>
-                      <Link
-                        to={routes.signUp}
-                        className="text-sm font-medium text-white hover:text-gray-100"
-                      >
-                        {translations.routes.signUp}
-                      </Link>
-                    </React.Fragment>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Secondary navigation */}
-            <div className="bg-white bg-opacity-10 backdrop-blur-md backdrop-filter">
+            {/* Secondary Navigation */}
+            <div className="bg-white ">
               <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                   <div className="hidden h-full lg:flex">
-                    {/* Mega menus */}
-                    <Popover.Group className="ml-8">
-                      <div className="flex justify-center h-full space-x-8">
-                        {navigation.categories.map((category, categoryIdx) => (
-                          <Popover key={category.name} className="flex">
-                            {({ open }) => (
-                              <>
-                                <div className="relative flex">
-                                  <Popover.Button
-                                    className={classNames(
-                                      open
-                                        ? "border-white text-white"
-                                        : "border-transparent text-white",
-                                      "relative z-10 -mb-px flex items-center border-b-2 pt-px text-sm font-medium transition-colors duration-200 ease-out"
-                                    )}
-                                  >
-                                    {category.name}
-                                  </Popover.Button>
-                                </div>
-
-                                <Transition
-                                  as={Fragment}
-                                  enter="transition ease-out duration-200"
-                                  enterFrom="opacity-0"
-                                  enterTo="opacity-100"
-                                  leave="transition ease-in duration-150"
-                                  leaveFrom="opacity-100"
-                                  leaveTo="opacity-0"
-                                >
-                                  <Popover.Panel className="absolute inset-x-0 text-gray-500 top-full sm:text-sm">
-                                    {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
-                                    <div
-                                      className="absolute inset-0 bg-white shadow top-1/2"
-                                      aria-hidden="true"
-                                    />
-
-                                    <div className="relative bg-white">
-                                      <div className="px-8 mx-auto max-w-7xl">
-                                        <div className="grid items-start grid-cols-2 pt-10 pb-12 gap-y-10 gap-x-8">
-                                          <div className="grid grid-cols-2 gap-y-10 gap-x-8">
-                                            <div>
-                                              <p
-                                                id={`desktop-featured-heading-${categoryIdx}`}
-                                                className="font-medium text-gray-900"
-                                              >
-                                                Featured
-                                              </p>
-                                              <ul
-                                                role="list"
-                                                aria-labelledby={`desktop-featured-heading-${categoryIdx}`}
-                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
-                                              >
-                                                {category.takeAway.map(
-                                                  (item) => (
-                                                    <li
-                                                      key={item.name}
-                                                      className="flex"
-                                                    >
-                                                      <a
-                                                        href={item.href}
-                                                        className="hover:text-gray-800"
-                                                      >
-                                                        {item.name}
-                                                      </a>
-                                                    </li>
-                                                  )
-                                                )}
-                                              </ul>
-                                            </div>
-                                            <div>
-                                              <p
-                                                id="desktop-categories-heading"
-                                                className="font-medium text-gray-900"
-                                              >
-                                                Categories
-                                              </p>
-                                              <ul
-                                                role="list"
-                                                aria-labelledby="desktop-categories-heading"
-                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
-                                              >
-                                                {category.categories.map(
-                                                  (item) => (
-                                                    <li
-                                                      key={item.name}
-                                                      className="flex"
-                                                    >
-                                                      <a
-                                                        href={item.href}
-                                                        className="hover:text-gray-800"
-                                                      >
-                                                        {item.name}
-                                                      </a>
-                                                    </li>
-                                                  )
-                                                )}
-                                              </ul>
-                                            </div>
-                                          </div>
-                                          <div className="grid grid-cols-2 gap-y-10 gap-x-8">
-                                            <div>
-                                              <p
-                                                id="desktop-collection-heading"
-                                                className="font-medium text-gray-900"
-                                              >
-                                                Collection
-                                              </p>
-                                              <ul
-                                                role="list"
-                                                aria-labelledby="desktop-collection-heading"
-                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
-                                              >
-                                                {category.collection.map(
-                                                  (item) => (
-                                                    <li
-                                                      key={item.name}
-                                                      className="flex"
-                                                    >
-                                                      <a
-                                                        href={item.href}
-                                                        className="hover:text-gray-800"
-                                                      >
-                                                        {item.name}
-                                                      </a>
-                                                    </li>
-                                                  )
-                                                )}
-                                              </ul>
-                                            </div>
-
-                                            <div>
-                                              <p
-                                                id="desktop-brand-heading"
-                                                className="font-medium text-gray-900"
-                                              >
-                                                Brands
-                                              </p>
-                                              <ul
-                                                role="list"
-                                                aria-labelledby="desktop-brand-heading"
-                                                className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
-                                              >
-                                                {category.brands.map((item) => (
-                                                  <li
-                                                    key={item.name}
-                                                    className="flex"
-                                                  >
-                                                    <a
-                                                      href={item.href}
-                                                      className="hover:text-gray-800"
-                                                    >
-                                                      {item.name}
-                                                    </a>
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </Popover.Panel>
-                                </Transition>
-                              </>
-                            )}
-                          </Popover>
+                    <div className="mt-2 ml-8">
+                      <div className="flex px-4 -mb-px space-x-8">
+                        {navigation.pages.map((page) => (
+                          <Link
+                            key={page.name}
+                            to={page.href}
+                            className="flex-1 px-1 py-4 text-base font-medium text-gray-700 whitespace-nowrap hover:border-b"
+                          >
+                            {page.name}
+                          </Link>
                         ))}
                       </div>
-                    </Popover.Group>
+                    </div>
                   </div>
 
                   {/* Mobile menu and search (lg-) */}
@@ -601,7 +192,7 @@ export default function Index() {
                     <div className="flex items-center lg:ml-8 lg:space-x-2">
                       {/* Help */}
                       <a
-                        className="p-2 text-white lg:hidden"
+                        className="p-2 text-gray-700 lg:hidden"
                         href={`tel:${Phone}`}
                       >
                         <span className="sr-only">
@@ -611,21 +202,21 @@ export default function Index() {
                       </a>
                       <a
                         href={`tel:${Phone}`}
-                        className="hidden text-sm font-medium text-white lg:flex lg:justify-evenly lg:space-x-1"
+                        className="hidden text-sm font-medium text-gray-700 lg:flex lg:justify-evenly lg:space-x-1"
                       >
                         <PhoneOutgoingIcon className="w-6 h-6" />
                         <span>{Phone}</span>
                       </a>
 
                       <a
-                        className="p-2 text-white lg:hidden"
+                        className="p-2 text-gray-700 lg:hidden"
                         href={`email:${Email}`}
                       >
                         <AtSymbolIcon className="w-6 h-6" />
                       </a>
                       <a
                         href={`email:${Email}`}
-                        className="hidden text-sm font-medium text-white lg:flex lg:justify-evenly lg:space-x-1"
+                        className="hidden text-sm font-medium text-gray-700 lg:flex lg:justify-evenly lg:space-x-1"
                       >
                         <AtSymbolIcon className="w-6 h-6" />
                         <span>{Email}</span>
@@ -633,19 +224,7 @@ export default function Index() {
 
                       {/* Cart */}
                       <div className="flow-root ml-4 lg:ml-8">
-                        <button
-                          onClick={() => setCartOpen(!cartOpen)}
-                          className="flex items-center p-2 -m-2 group"
-                        >
-                          <ShoppingBagIcon
-                            className="flex-shrink-0 w-6 h-6 text-white"
-                            aria-hidden="true"
-                          />
-                          <span className="ml-2 text-sm font-medium text-white">
-                            0
-                          </span>
-                          <span className="sr-only">Varer i indkøbskurv</span>
-                        </button>
+                        <CartPopover />
                       </div>
                     </div>
                   </div>
@@ -679,49 +258,6 @@ export default function Index() {
       </div>
 
       <main>
-        {/* Collection section */}
-        {collections.map((category) => (
-          <section
-            key={category.name}
-            aria-labelledby="collection-heading"
-            className="max-w-xl px-4 pt-24 mx-auto sm:px-6 sm:pt-32 lg:max-w-7xl lg:px-8"
-          >
-            <h2
-              id="collection-heading"
-              className="text-2xl font-extrabold tracking-tight text-gray-900"
-            >
-              {category.name}
-            </h2>
-
-            <div className="mt-10 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-8 lg:space-y-0">
-              {category.featured.map((collection) => (
-                <a
-                  key={collection.name}
-                  href={collection.href}
-                  className="block group"
-                >
-                  <div
-                    aria-hidden="true"
-                    className="overflow-hidden rounded-lg aspect-w-3 aspect-h-2 group-hover:opacity-75 lg:aspect-w-5 lg:aspect-h-6"
-                  >
-                    <img
-                      src={collection.imageSrc}
-                      alt={collection.imageAlt}
-                      className="object-cover object-center w-full h-full"
-                    />
-                  </div>
-                  <h3 className="mt-4 text-base font-semibold text-gray-900">
-                    {collection.name}
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-500">
-                    {collection.description}
-                  </p>
-                </a>
-              ))}
-            </div>
-          </section>
-        ))}
-
         <section aria-labelledby="trending-heading">
           <div className="px-4 py-24 mx-auto max-w-7xl sm:px-6 sm:py-32 lg:px-8 lg:pt-32">
             <div className="md:flex md:items-center md:justify-between">
