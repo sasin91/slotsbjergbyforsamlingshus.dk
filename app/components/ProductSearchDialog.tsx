@@ -20,7 +20,7 @@ const people = [
   // More people...
 ];
 
-const recent = [people[5], people[4], people[2], people[10], people[16]];
+const recent = [people[0]];
 
 export default function ProductSearchDialog({
   open,
