@@ -17,7 +17,6 @@ import CartPopover from "~/components/CartPopover";
 import Footer from "~/components/Footer";
 import { IntlMoney } from "~/components/IntlMoney";
 import Logo from "~/components/Logo";
-import ProductSearchDialog from "~/components/ProductSearchDialog";
 import TopNavigation from "~/components/TopNavigation";
 import { AppName } from "~/config";
 import useKey from "~/hooks/useKey";
@@ -262,10 +261,6 @@ export default function MenuPage() {
                       </span>
                       <SearchIcon className="w-6 h-6" aria-hidden="true" />
                     </button>
-                    <ProductSearchDialog
-                      open={searchDialogOpen}
-                      setOpen={setSearchDialogOpen}
-                    />
                   </div>
 
                   {/* Logo (lg-) */}
@@ -448,7 +443,7 @@ export default function MenuPage() {
                     <Menu.Items className="absolute left-0 z-10 w-40 mt-2 origin-top-left bg-white rounded-md shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <div className="py-1">
                         {sortOptions.map((option) => (
-                          <Menu.Item key={option}>
+                          <Menu.Item key={option.name}>
                             {({ active }) => (
                               <a
                                 href={option.href}

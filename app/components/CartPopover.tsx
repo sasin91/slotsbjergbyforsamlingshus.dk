@@ -55,7 +55,7 @@ export default function Cart() {
           <h2 className="sr-only">Indkøbskurv</h2>
 
           <form className="max-w-2xl px-4 mx-auto">
-            <ul role="list" className="divide-y divide-gray-200">
+            <ul className="divide-y divide-gray-200">
               {products.map((product) => (
                 <li key={product.id} className="flex items-center py-6">
                   <img
