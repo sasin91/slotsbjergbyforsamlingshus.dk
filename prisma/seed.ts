@@ -33,6 +33,17 @@ Bestil hos Anne tlf. 2014 4080 - email: <kontakt@slotsbjergbyfesthus.dk>
 }
 
 async function createProducts() {
+  // cleanup the existing database
+  await prisma.categoriesOnProducts.deleteMany().catch(() => {
+    // no worries if it doesn't exist yet
+  });
+  await prisma.category.deleteMany().catch(() => {
+    // no worries if it doesn't exist yet
+  });
+  await prisma.product.deleteMany().catch(() => {
+    // no worries if it doesn't exist yet
+  });
+
   const createCategory = async ({
     slug,
     title,
@@ -64,7 +75,7 @@ async function createProducts() {
 
   const mainCourse = await createCategory({
     slug: "hovedretter",
-    title: "Forret",
+    title: "Hovedretter",
   });
 
   const desserts = await createCategory({

@@ -3,13 +3,12 @@ import {
   Disclosure,
   Menu,
   Popover,
-  Tab,
   Transition,
 } from "@headlessui/react";
 import { MenuIcon, SearchIcon, XIcon } from "@heroicons/react/outline";
 import { ChevronDownIcon } from "@heroicons/react/solid";
 import type { Product } from "@prisma/client";
-import { useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { Fragment, useState } from "react";
@@ -22,34 +21,22 @@ import ProductSearchDialog from "~/components/ProductSearchDialog";
 import TopNavigation from "~/components/TopNavigation";
 import { AppName } from "~/config";
 import useKey from "~/hooks/useKey";
-import type { Category } from "~/models/category.server";
 import { getCategories } from "~/models/category.server";
 import { getProducts } from "~/models/product.server";
 import { classNames, routes, translations, useOptionalUser } from "~/utils";
 
-type NavigationCategoryFeature = {
-  name: string;
-  href: string;
-  price: number;
-  imageSrc: string;
-  imageAlt: string;
-};
-type NavigationCategory = {
-  name: string;
-  featured: NavigationCategoryFeature[];
-};
 type NavigationPage = {
   name: string;
   href: string;
 };
 
 type Navigation = {
-  categories: NavigationCategory[];
   pages: NavigationPage[];
 };
 
-type FilterId = "category" | "brand" | "color" | "sizes";
+type FilterId = "category";
 type FilterOption = {
+  checked: boolean;
   value: string;
   label: string;
 };
@@ -60,7 +47,6 @@ type Filter = {
 };
 
 type LoaderData = {
-  categories: Category[];
   navigation: Navigation;
   filters: Filter[];
   products: Product[];
@@ -74,45 +60,51 @@ const sortOptions = [
   { name: "Price: High to Low", href: "#" },
 ];
 
-export const loader: LoaderFunction = async () => {
+export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const search = new URLSearchParams(url.search);
+
   const categoryDataLoader = getCategories();
   const categories = await categoryDataLoader({
-    include: { products: { take: 3, include: { product: {} } } },
+    select: { title: true, slug: true },
   });
-  const navigationCategories = categories.map<NavigationCategory>(
-    (category: Category) => ({
-      name: category.title,
-      featured: category.products.map((pivot: { product: Product }) => ({
-        name: pivot.product.title,
-        href: pivot.product.slug,
-        imageSrc: pivot.product.imageSrc,
-        imageAlt: pivot.product.imageAlt,
-        price: pivot.product.priceInDKK,
-      })),
-    })
-  );
 
   const productDataLoader = getProducts();
-  const products = await productDataLoader({
-    take: 15,
-  });
+  const products = search.has("category[]")
+    ? await productDataLoader({
+        where: {
+          categories: {
+            some: {
+              categoryId: {
+                in: search.getAll("category[]"),
+              },
+            },
+          },
+        },
+        take: 15,
+      })
+    : await productDataLoader({
+        take: 15,
+      });
 
   const navigation: Navigation = {
-    categories: navigationCategories,
     pages: [
       { name: translations.routes.index, href: routes.index },
       { name: translations.routes.arrangements, href: routes.arrangements },
     ],
   };
 
+  const filterOptions: FilterOption[] = categories.map(({ title, slug }) => ({
+    checked: search.getAll("category[]").includes(slug),
+    label: title,
+    value: slug,
+  }));
+
   const filters: Filter[] = [
     {
       id: "category",
-      name: "Category",
-      options: categories.map((c: Category) => ({
-        label: c.title,
-        value: c.slug,
-      })),
+      name: "Produkt kategori",
+      options: filterOptions,
     },
   ];
 
@@ -175,68 +167,6 @@ export default function MenuPage() {
                     </button>
                   </div>
 
-                  {/* Links */}
-                  <Tab.Group as="div" className="mt-2">
-                    <div className="border-b border-gray-200">
-                      <Tab.List className="flex px-4 -mb-px space-x-8">
-                        {navigation.categories.map((category) => (
-                          <Tab
-                            key={category.name}
-                            className={({ selected }) =>
-                              classNames(
-                                selected
-                                  ? "border-indigo-600 text-indigo-600"
-                                  : "border-transparent text-gray-900",
-                                "flex-1 whitespace-nowrap border-b-2 py-4 px-1 text-base font-medium"
-                              )
-                            }
-                          >
-                            {category.name}
-                          </Tab>
-                        ))}
-                      </Tab.List>
-                    </div>
-                    <Tab.Panels as={Fragment}>
-                      {navigation.categories.map((category) => (
-                        <Tab.Panel
-                          key={category.name}
-                          className="px-4 py-6 space-y-12"
-                        >
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-10">
-                            {category.featured.map((item) => (
-                              <div key={item.name} className="relative group">
-                                <div className="overflow-hidden bg-gray-100 rounded-md aspect-w-1 aspect-h-1 group-hover:opacity-75">
-                                  <img
-                                    src={item.imageSrc}
-                                    alt={item.imageAlt}
-                                    className="object-cover object-center"
-                                  />
-                                </div>
-                                <a
-                                  href={item.href}
-                                  className="block mt-6 text-sm font-medium text-gray-900"
-                                >
-                                  <span
-                                    className="absolute inset-0 z-10"
-                                    aria-hidden="true"
-                                  />
-                                  {item.name}
-                                </a>
-                                <p
-                                  aria-hidden="true"
-                                  className="mt-1 text-sm text-gray-500"
-                                >
-                                  banana {item.price}
-                                  <IntlMoney>{item.price}</IntlMoney>
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </Tab.Panel>
-                      ))}
-                    </Tab.Panels>
-                  </Tab.Group>
-
                   <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     {navigation.pages.map((page) => (
                       <div key={page.name} className="flow-root">
@@ -250,7 +180,7 @@ export default function MenuPage() {
                     ))}
                   </div>
 
-                  <div className="px-4 py-6 space-y-6 border-t border-gray-200">
+                  {/* <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
                       <a
                         href="#"
@@ -267,7 +197,7 @@ export default function MenuPage() {
                         Sign in
                       </a>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* <CurrencySelector /> */}
                 </Dialog.Panel>
@@ -298,113 +228,14 @@ export default function MenuPage() {
                     {/* Flyout menus */}
                     <Popover.Group className="inset-x-0 bottom-0 px-4">
                       <div className="flex justify-center h-full space-x-8">
-                        {navigation.categories.map((category) => (
-                          <Popover key={category.name} className="flex">
-                            {({ open }) => (
-                              <>
-                                <div className="relative flex">
-                                  <Popover.Button
-                                    className={classNames(
-                                      open
-                                        ? "text-indigo-600"
-                                        : "text-gray-700 hover:text-gray-800",
-                                      "relative flex items-center justify-center text-sm font-medium transition-colors duration-200 ease-out"
-                                    )}
-                                  >
-                                    {category.name}
-                                    <span
-                                      className={classNames(
-                                        open ? "bg-indigo-600" : "",
-                                        "absolute inset-x-0 -bottom-px z-30 h-0.5 transition duration-200 ease-out"
-                                      )}
-                                      aria-hidden="true"
-                                    />
-                                  </Popover.Button>
-                                </div>
-
-                                <Transition
-                                  as={Fragment}
-                                  enter="transition ease-out duration-200"
-                                  enterFrom="opacity-0"
-                                  enterTo="opacity-100"
-                                  leave="transition ease-in duration-150"
-                                  leaveFrom="opacity-100"
-                                  leaveTo="opacity-0"
-                                >
-                                  <Popover.Panel className="absolute inset-x-0 z-20 text-sm text-gray-500 bg-white top-full">
-                                    {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
-                                    <div
-                                      className="absolute inset-0 bg-white shadow top-1/2"
-                                      aria-hidden="true"
-                                    />
-                                    {/* Fake border when menu is open */}
-                                    <div
-                                      className="absolute inset-0 top-0 h-px px-8 mx-auto max-w-7xl"
-                                      aria-hidden="true"
-                                    >
-                                      <div
-                                        className={classNames(
-                                          open
-                                            ? "bg-gray-200"
-                                            : "bg-transparent",
-                                          "h-px w-full transition-colors duration-200 ease-out"
-                                        )}
-                                      />
-                                    </div>
-
-                                    <div className="relative">
-                                      <div className="px-8 mx-auto max-w-7xl">
-                                        <div className="grid grid-cols-4 py-16 gap-y-10 gap-x-8">
-                                          {category.featured.map((item) => (
-                                            <div
-                                              key={item.name}
-                                              className="relative group"
-                                            >
-                                              <div className="overflow-hidden bg-gray-100 rounded-md aspect-w-1 aspect-h-1 group-hover:opacity-75">
-                                                <img
-                                                  src={item.imageSrc}
-                                                  alt={item.imageAlt}
-                                                  className="object-cover object-center"
-                                                />
-                                              </div>
-                                              <a
-                                                href={item.href}
-                                                className="block mt-4 font-medium text-gray-900"
-                                              >
-                                                <span
-                                                  className="absolute inset-0 z-10"
-                                                  aria-hidden="true"
-                                                />
-                                                {item.name}
-                                              </a>
-                                              <p
-                                                aria-hidden="true"
-                                                className="mt-1"
-                                              >
-                                                <IntlMoney>
-                                                  {item.price}
-                                                </IntlMoney>
-                                              </p>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </Popover.Panel>
-                                </Transition>
-                              </>
-                            )}
-                          </Popover>
-                        ))}
-                        <span className="h-12 my-2 border-l-2 border-gray-500" />
                         {navigation.pages.map((page) => (
-                          <a
+                          <Link
                             key={page.name}
-                            href={page.href}
+                            to={page.href}
                             className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
                           >
                             {page.name}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     </Popover.Group>
@@ -498,20 +329,20 @@ export default function MenuPage() {
                 <Dialog.Panel className="relative flex flex-col w-full h-full max-w-xs py-4 pb-6 ml-auto overflow-y-auto bg-white shadow-xl">
                   <div className="flex items-center justify-between px-4">
                     <h2 className="text-lg font-medium text-gray-900">
-                      Filters
+                      Filtrer produkter
                     </h2>
                     <button
                       type="button"
                       className="flex items-center justify-center w-10 h-10 p-2 -mr-2 text-gray-400 bg-white rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       onClick={() => setMobileFiltersOpen(false)}
                     >
-                      <span className="sr-only">Close menu</span>
+                      <span className="sr-only">Luk menu</span>
                       <XIcon className="w-6 h-6" aria-hidden="true" />
                     </button>
                   </div>
 
                   {/* Filters */}
-                  <form className="mt-4">
+                  <Form className="mt-4" action="" method="get">
                     {filters.map((section) => (
                       <Disclosure
                         as="div"
@@ -565,7 +396,7 @@ export default function MenuPage() {
                         )}
                       </Disclosure>
                     ))}
-                  </form>
+                  </Form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
@@ -641,7 +472,7 @@ export default function MenuPage() {
                   className="inline-block text-sm font-medium text-gray-700 hover:text-gray-900 sm:hidden"
                   onClick={() => setMobileFiltersOpen(true)}
                 >
-                  Filters
+                  Filtrer produkter
                 </button>
 
                 <Popover.Group className="hidden sm:flex sm:items-baseline sm:space-x-8">
@@ -655,11 +486,12 @@ export default function MenuPage() {
                       <div>
                         <Popover.Button className="inline-flex items-center justify-center text-sm font-medium text-gray-700 group hover:text-gray-900">
                           <span>{section.name}</span>
-                          {sectionIdx === 0 ? (
-                            <span className="ml-1.5 rounded bg-gray-200 py-0.5 px-1.5 text-xs font-semibold tabular-nums text-gray-700">
-                              1
-                            </span>
-                          ) : null}
+                          <span className="ml-1.5 rounded bg-gray-200 py-0.5 px-1.5 text-xs font-semibold tabular-nums text-gray-700">
+                            {
+                              section.options.filter((opt) => opt.checked)
+                                .length
+                            }
+                          </span>
                           <ChevronDownIcon
                             className="flex-shrink-0 w-5 h-5 ml-1 -mr-1 text-gray-400 group-hover:text-gray-500"
                             aria-hidden="true"
@@ -677,7 +509,7 @@ export default function MenuPage() {
                         leaveTo="transform opacity-0 scale-95"
                       >
                         <Popover.Panel className="absolute right-0 p-4 mt-2 origin-top-right bg-white rounded-md shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <form className="space-y-4">
+                          <Form className="space-y-4" action="" method="get">
                             {section.options.map((option, optionIdx) => (
                               <div
                                 key={option.value}
@@ -699,7 +531,14 @@ export default function MenuPage() {
                                 </label>
                               </div>
                             ))}
-                          </form>
+
+                            <button
+                              className="w-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:bg-blue-400"
+                              type="submit"
+                            >
+                              Filtrér
+                            </button>
+                          </Form>
                         </Popover.Panel>
                       </Transition>
                     </Popover>
@@ -711,27 +550,31 @@ export default function MenuPage() {
             {/* Product grid */}
             <section aria-labelledby="products-heading" className="mt-8">
               <h2 id="products-heading" className="sr-only">
-                Products
+                Produkter
               </h2>
 
               <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
                 {products.map((product) => (
-                  <a key={product.id} href={product.href} className="group">
+                  <Link key={product.slug} to={product.slug} className="group">
                     <div className="w-full overflow-hidden rounded-lg aspect-w-1 aspect-h-1 sm:aspect-w-2 sm:aspect-h-3">
                       <img
-                        src={product.imageSrc}
-                        alt={product.imageAlt}
+                        src={
+                          product.imageSrc
+                            ? product.imageSrc
+                            : "https://via.placeholder.com/384x576"
+                        }
+                        alt={String(product.imageAlt)}
                         className="object-cover object-center w-full h-full group-hover:opacity-75"
                       />
                     </div>
                     <div className="flex items-center justify-between mt-4 text-base font-medium text-gray-900">
-                      <h3>{product.name}</h3>
-                      <p>{product.price}</p>
+                      <h3>{product.title}</h3>
+                      <IntlMoney>{product.priceInDKK}</IntlMoney>
                     </div>
                     <p className="mt-1 text-sm italic text-gray-500">
                       {product.description}
                     </p>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </section>
