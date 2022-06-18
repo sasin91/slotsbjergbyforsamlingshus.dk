@@ -6,7 +6,7 @@ import {
   XIcon,
 } from "@heroicons/react/outline";
 import type { Post } from "@prisma/client";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, NavLink, useLoaderData } from "@remix-run/react";
 import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { marked } from "marked";
@@ -18,10 +18,11 @@ import TopNavigation from "~/components/TopNavigation";
 import { AppName, Email, Phone } from "~/config";
 import banner from "~/images/borddaekning1.jpg";
 import { getPosts } from "~/models/post.server";
-import { routes, translations, useOptionalUser } from "~/utils";
+import { classNames, routes, translations, useOptionalUser } from "~/utils";
 
 const navigation = {
   pages: [
+    { name: translations.routes.index, href: routes.index },
     { name: translations.routes.menu, href: routes.menu },
     { name: translations.routes.arrangements, href: routes.arrangements },
   ],
@@ -83,24 +84,34 @@ export default function Index() {
                 {/* Links */}
                 <div className="mt-2">
                   {navigation.pages.map((page) => (
-                    <Link
+                    <NavLink
                       key={page.name}
                       to={page.href}
-                      className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
+                      className={({ isActive }) =>
+                        classNames(
+                          isActive ? "border-b-2 border-indigo-500" : "",
+                          "flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
+                        )
+                      }
                     >
                       {page.name}
-                    </Link>
+                    </NavLink>
                   ))}
                 </div>
                 {user ? (
                   <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
-                      <Link
+                      <NavLink
                         to={routes.dashboard}
-                        className="text-sm font-medium text-white hover:text-gray-100"
+                        className={({ isActive }) =>
+                          classNames(
+                            isActive ? "border-b-2 border-indigo-500" : "",
+                            "text-sm font-medium text-white hover:text-gray-100"
+                          )
+                        }
                       >
                         {translations.routes.dashboard}
-                      </Link>
+                      </NavLink>
                       <Form action={routes.signOut} method="post">
                         <button
                           type="submit"
@@ -114,20 +125,30 @@ export default function Index() {
                 ) : (
                   <div className="px-4 py-6 space-y-6 border-t border-gray-200">
                     <div className="flow-root">
-                      <Link
+                      <NavLink
                         to={routes.signUp}
-                        className="text-sm font-medium text-white hover:text-gray-100"
+                        className={({ isActive }) =>
+                          classNames(
+                            isActive ? "border-b-2 border-indigo-500" : "",
+                            "text-sm font-medium text-white hover:text-gray-100"
+                          )
+                        }
                       >
                         {translations.routes.signUp}
-                      </Link>
+                      </NavLink>
                     </div>
                     <div className="flow-root">
-                      <Link
+                      <NavLink
                         to={routes.signIn}
-                        className="text-sm font-medium text-white hover:text-gray-100"
+                        className={({ isActive }) =>
+                          classNames(
+                            isActive ? "border-b-2 border-indigo-500" : "",
+                            "text-sm font-medium text-white hover:text-gray-100"
+                          )
+                        }
                       >
                         {translations.routes.signIn}
-                      </Link>
+                      </NavLink>
                     </div>
                   </div>
                 )}
@@ -164,13 +185,18 @@ export default function Index() {
                     <div className="mt-2 ml-8">
                       <div className="flex px-4 -mb-px space-x-8">
                         {navigation.pages.map((page) => (
-                          <Link
+                          <NavLink
                             key={page.name}
                             to={page.href}
-                            className="flex-1 px-1 py-4 text-base font-medium text-gray-700 whitespace-nowrap hover:border-b"
+                            className={({ isActive }) =>
+                              classNames(
+                                isActive ? "border-b-2 border-indigo-500" : "",
+                                "flex-1 whitespace-nowrap px-1 py-4 text-base font-medium text-gray-700 hover:border-b"
+                              )
+                            }
                           >
                             {page.name}
-                          </Link>
+                          </NavLink>
                         ))}
                       </div>
                     </div>
@@ -283,7 +309,7 @@ export default function Index() {
                       <p className="text-sm text-gray-500">
                         <IntlDate date={post.createdAt} />
                       </p>
-                      <Link to={post.slug} className="block mt-2">
+                      <div className="block mt-2">
                         <p className="text-xl font-semibold text-gray-900">
                           {post.title}
                         </p>
@@ -293,7 +319,7 @@ export default function Index() {
                             __html: marked(post.markdown),
                           }}
                         ></div>
-                      </Link>
+                      </div>
                       <div className="mt-3">
                         <Link
                           to={`/posts/${post.slug}`}
