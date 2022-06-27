@@ -3,32 +3,21 @@ import {
   Disclosure,
   Menu,
   Popover,
-  Transition,
+  Transition
 } from "@headlessui/react";
-import { MenuIcon, SearchIcon, XIcon } from "@heroicons/react/outline";
+import { XIcon } from "@heroicons/react/outline";
 import { ChevronDownIcon } from "@heroicons/react/solid";
 import type { Product } from "@prisma/client";
-import { Form, Link, NavLink, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import type { LoaderFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { Fragment, useState } from "react";
-import CartPopover from "~/components/CartPopover";
 import Footer from "~/components/Footer";
 import { IntlMoney } from "~/components/IntlMoney";
-import TopNavigation from "~/components/TopNavigation";
-import useKey from "~/hooks/useKey";
+import Navbar from "~/components/Navbar";
 import { getCategories } from "~/models/category.server";
 import { getProducts } from "~/models/product.server";
-import { classNames, routes, translations, useOptionalUser } from "~/utils";
-
-type NavigationPage = {
-  name: string;
-  href: string;
-};
-
-type Navigation = {
-  pages: NavigationPage[];
-};
+import { classNames } from "~/utils";
 
 type FilterId = "category";
 type FilterOption = {
@@ -43,7 +32,6 @@ type Filter = {
 };
 
 type LoaderData = {
-  navigation: Navigation;
   filters: Filter[];
   products: Product[];
 };
@@ -83,14 +71,6 @@ export const loader: LoaderFunction = async ({ request }) => {
         take: 15,
       });
 
-  const navigation: Navigation = {
-    pages: [
-      { name: translations.routes.index, href: routes.index },
-      { name: translations.routes.menu, href: routes.menu },
-      { name: translations.routes.arrangements, href: routes.arrangements },
-    ],
-  };
-
   const filterOptions: FilterOption[] = categories.map(({ title, slug }) => ({
     checked: search.getAll("category[]").includes(slug),
     label: title,
@@ -105,192 +85,17 @@ export const loader: LoaderFunction = async ({ request }) => {
     },
   ];
 
-  return json<LoaderData>({ navigation, products, filters });
+  return json<LoaderData>({ products, filters });
 };
 
 export default function MenuPage() {
-  const { navigation, products, filters } = useLoaderData<LoaderData>();
+  const { products, filters } = useLoaderData<LoaderData>();
 
-  const user = useOptionalUser();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-  useKey(
-    (event) => event.ctrlKey && event.key === "k",
-    () => setSearchDialogOpen(true)
-  );
 
   return (
     <div className="bg-gray-50">
-      <div>
-        {/* Mobile menu */}
-        <Transition.Root show={mobileMenuOpen} as={Fragment}>
-          <Dialog
-            as="div"
-            className="relative z-40 lg:hidden"
-            onClose={setMobileMenuOpen}
-          >
-            <Transition.Child
-              as={Fragment}
-              enter="transition-opacity ease-linear duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="transition-opacity ease-linear duration-300"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="fixed inset-0 bg-black bg-opacity-25" />
-            </Transition.Child>
-
-            <div className="fixed inset-0 z-40 flex">
-              <Transition.Child
-                as={Fragment}
-                enter="transition ease-in-out duration-300 transform"
-                enterFrom="-translate-x-full"
-                enterTo="translate-x-0"
-                leave="transition ease-in-out duration-300 transform"
-                leaveFrom="translate-x-0"
-                leaveTo="-translate-x-full"
-              >
-                <Dialog.Panel className="relative flex flex-col w-full max-w-xs pb-12 overflow-y-auto bg-white shadow-xl">
-                  <div className="flex px-4 pt-5 pb-2">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center p-2 -m-2 text-gray-400 rounded-md"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span className="sr-only">Luk menu</span>
-                      <XIcon className="w-6 h-6" aria-hidden="true" />
-                    </button>
-                  </div>
-
-                  <div className="px-4 py-6 space-y-6 border-t border-gray-200">
-                    {navigation.pages.map((page) => (
-                      <div key={page.name} className="flow-root">
-                        <NavLink
-                          to={page.href}
-                          className={({ isActive }) =>
-                            classNames(
-                              isActive ? "border-b-2 border-indigo-500" : "",
-                              "-m-2 block p-2 font-medium text-gray-900"
-                            )
-                          }
-                        >
-                          {page.name}
-                        </NavLink>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* <div className="px-4 py-6 space-y-6 border-t border-gray-200">
-                    <div className="flow-root">
-                      <a
-                        href="#"
-                        className="block p-2 -m-2 font-medium text-gray-900"
-                      >
-                        Create an account
-                      </a>
-                    </div>
-                    <div className="flow-root">
-                      <a
-                        href="#"
-                        className="block p-2 -m-2 font-medium text-gray-900"
-                      >
-                        Sign in
-                      </a>
-                    </div>
-                  </div> */}
-
-                  {/* <CurrencySelector /> */}
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </Dialog>
-        </Transition.Root>
-
-        <header className="relative">
-          <nav aria-label="Top">
-            {/* Top navigation */}
-            <TopNavigation user={user} />
-
-            {/* Secondary navigation */}
-            <div className="bg-white shadow-sm">
-              <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                  <div className="hidden h-full lg:flex">
-                    {/* Flyout menus */}
-                    <Popover.Group className="inset-x-0 bottom-0 px-4">
-                      <div className="flex justify-center h-full space-x-8">
-                        {navigation.pages.map((page) => (
-                          <Link
-                            key={page.name}
-                            to={page.href}
-                            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
-                          >
-                            {page.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </Popover.Group>
-                  </div>
-
-                  {/* Mobile menu and search (lg-) */}
-                  <div className="flex items-center flex-1 lg:hidden">
-                    <button
-                      type="button"
-                      className="p-2 -ml-2 text-gray-400 bg-white rounded-md"
-                      onClick={() => setMobileMenuOpen(true)}
-                    >
-                      <span className="sr-only">Open menu</span>
-                      <MenuIcon className="w-6 h-6" aria-hidden="true" />
-                    </button>
-
-                    {/* Search */}
-                    <button
-                      onClick={() => setSearchDialogOpen(!searchDialogOpen)}
-                      className="p-2 ml-2 text-gray-400 hover:text-gray-500"
-                    >
-                      <span className="sr-only">
-                        Søg efter produkter eller arrangementer
-                      </span>
-                      <SearchIcon className="w-6 h-6" aria-hidden="true" />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-end flex-1">
-                    <label
-                      htmlFor="search"
-                      className="block text-sm font-medium text-gray-700 sr-only"
-                    >
-                      Quick search
-                    </label>
-                    <div className="relative flex items-center mt-1">
-                      <input
-                        type="text"
-                        name="search"
-                        id="search"
-                        className="block w-full pr-12 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                      <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
-                        <kbd className="inline-flex items-center px-2 font-sans text-sm font-medium text-gray-400 border border-gray-200 rounded">
-                          ⌘K
-                        </kbd>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center lg:ml-8">
-                      {/* Cart */}
-                      <div className="flow-root ml-4 lg:ml-8">
-                        <CartPopover />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </nav>
-        </header>
-      </div>
+      <Navbar />
 
       <div>
         {/* Mobile filter dialog */}
@@ -417,14 +222,14 @@ export default function MenuPage() {
               className="pt-6 border-t border-gray-200"
             >
               <h2 id="filter-heading" className="sr-only">
-                Product filters
+                Produkt filtre
               </h2>
 
               <div className="flex items-center justify-between">
                 <Menu as="div" className="relative z-10 inline-block text-left">
                   <div>
                     <Menu.Button className="inline-flex justify-center text-sm font-medium text-gray-700 group hover:text-gray-900">
-                      Sort
+                      Sorter
                       <ChevronDownIcon
                         className="flex-shrink-0 w-5 h-5 ml-1 -mr-1 text-gray-400 group-hover:text-gray-500"
                         aria-hidden="true"
@@ -468,7 +273,7 @@ export default function MenuPage() {
                   className="inline-block text-sm font-medium text-gray-700 hover:text-gray-900 sm:hidden"
                   onClick={() => setMobileFiltersOpen(true)}
                 >
-                  Filtrer produkter
+                  Filtrér
                 </button>
 
                 <Popover.Group className="hidden sm:flex sm:items-baseline sm:space-x-8">
@@ -551,7 +356,11 @@ export default function MenuPage() {
 
               <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
                 {products.map((product) => (
-                  <Link key={product.slug} to={product.slug} className="group">
+                  <Link
+                    key={product.slug}
+                    to={`/produkt/${product.slug}`}
+                    className="group"
+                  >
                     <div className="w-full overflow-hidden rounded-lg aspect-w-1 aspect-h-1 sm:aspect-w-2 sm:aspect-h-3">
                       <img
                         src={

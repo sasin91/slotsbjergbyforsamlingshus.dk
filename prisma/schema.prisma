@@ -51,6 +51,8 @@ model Product {
   createdAt   DateTime               @default(now())
   updatedAt   DateTime               @updatedAt
   categories  CategoriesOnProducts[]
+
+  carts ProductsInCart[]
 }
 
 model CategoriesOnProducts {
@@ -62,4 +64,21 @@ model CategoriesOnProducts {
   updatedAt  DateTime @updatedAt
 
   @@id([productId, categoryId])
+}
+
+model Cart {
+  id       String           @id @default(cuid())
+  total    Decimal
+  products ProductsInCart[]
+}
+
+model ProductsInCart {
+  product   Product  @relation(fields: [productId], references: [slug])
+  productId String // relation scalar field (used in the `@relation` attribute above)
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  cartId    String // relation scalar field (used in the `@relation` attribute above)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([productId, cartId])
 }
